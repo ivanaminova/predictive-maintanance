@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Box, AlertTriangle } from 'lucide-react';
@@ -59,7 +58,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onDelete }) =
         </div>
         
         <div className="flex-1 flex flex-col items-center justify-center">
-          <h3 className="text-lg font-medium text-foreground">{project.name}</h3>
+          <h3 className="text-lg font-medium text-[#f2f3f4]">{project.name}</h3>
         </div>
         
         <div className="flex justify-between items-center mt-4">

@@ -15,7 +15,7 @@ const Header = () => {
           alt="HPE Logo" 
           className="h-8 w-auto"
         />
-        <h1 className="text-primary font-semibold tracking-wide text-2xl">Predictive Maintanence</h1>
+        <h1 className="text-primary font-semibold tracking-wide text-2xl">Precision Edge</h1>
       </div>
       
       <button 

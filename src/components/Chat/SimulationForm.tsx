@@ -20,6 +20,8 @@ import { Machine, MachineDefaults } from "@/types";
 import chatService from "@/services/chatService";
 
 interface SimulationFormProps {
+  selectedMachine: MachineDefaults;
+  setSelectedMachine: React.Dispatch<React.SetStateAction<MachineDefaults>>;
   onSubmit: (data: SimulationData) => void;
   onCancel: () => void;
 }
@@ -36,6 +38,8 @@ interface SimulationData {
 }
 
 const SimulationForm: React.FC<SimulationFormProps> = ({
+  selectedMachine,
+  setSelectedMachine,
   onSubmit,
   onCancel,
 }) => {
@@ -53,7 +57,6 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
   });
 
   const [machines, setMachines] = useState<Machine[]>([]);
-  const [selectedMachine, setSelectedMachine] = useState<MachineDefaults>();
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
 
   useEffect(() => {
@@ -80,7 +83,6 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
       [name]: e.target.value
     }))
   }
-
 
   return (
     <Form {...form}>

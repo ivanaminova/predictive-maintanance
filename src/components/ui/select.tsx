@@ -148,35 +148,46 @@ const SelectSeparator = React.forwardRef<
 ));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
-const SelectDate = () => {
+// 
+
+const SelectDateRange = () => {
   const [isOpen, setIsOpen] = useState(false);
   const today = new Date();
   const minDate = new Date();
   minDate.setDate(today.getDate() - 7);
 
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const toggleCalendarHandler = () => {
-    setIsOpen((prevOpen) => !prevOpen);
+    setIsOpen((prev) => !prev);
   };
 
   return (
-    <div className="relative w-full sm:w-[240px]">
-      <div className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-[#01a982] focus-within:ring-offset-2">
+    <div className="relative w-full sm:w-[280px]">
+      <div
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-[#01a982] focus-within:ring-offset-2"
+      >
         <DatePicker
-          onInputClick={toggleCalendarHandler}
-          onSelect={(date) => setSelectedDate(date)}
+          selectsRange
+          startDate={startDate}
+          endDate={endDate}
+          onChange={(dates) => {
+            const [start, end] = dates;
+            setStartDate(start);
+            setEndDate(end);
+          }}
           open={isOpen}
-          selected={selectedDate}
+          onInputClick={toggleCalendarHandler}
           onClickOutside={toggleCalendarHandler}
-          minDate={minDate}
           maxDate={today}
           dateFormat="yyyy-MM-dd"
           className="w-full bg-transparent outline-none"
           popperClassName="custom-datepicker"
+          placeholderText="Select a date range"
         />
         <ChevronDown
-          className="h-4 w-4 opacity-50"
+          className="h-4 w-4 opacity-50 cursor-pointer"
           onClick={toggleCalendarHandler}
         />
       </div>
@@ -195,5 +206,5 @@ export {
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,
-  SelectDate,
+  SelectDateRange,
 };

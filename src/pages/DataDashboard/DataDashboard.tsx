@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectDate
+  SelectDateRange
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveDataCharts from "./LiveDataCharts";
@@ -75,7 +75,7 @@ const DataDashboard = () => {
                   <label htmlFor="date-select" className="text-sm font-medium">
                     Select Date:
                   </label>
-                  <SelectDate />
+                  <SelectDateRange />
                 </div>
               </div>
             </div>

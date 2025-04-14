@@ -22,7 +22,7 @@ import chatService from "@/services/chatService";
 interface SimulationFormProps {
   selectedMachine: MachineDefaults;
   setSelectedMachine: React.Dispatch<React.SetStateAction<MachineDefaults>>;
-  onSubmit: (data: SimulationData) => void;
+  onSubmit: (data: any) => void;
   onCancel: () => void;
 }
 
@@ -35,6 +35,7 @@ interface SimulationData {
   temperature: number;
   vibrationAmplitude: number;
   vibrationFrequency: number;
+  duration: number
 }
 
 const SimulationForm: React.FC<SimulationFormProps> = ({
@@ -44,16 +45,6 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
   onCancel,
 }) => {
   const form = useForm<SimulationData>({
-    defaultValues: {
-      machine: "Machine A",
-      airToFuelRatio: 14.7,
-      current: 10,
-      pressure: 101325,
-      rpm: 3000,
-      temperature: 25,
-      vibrationAmplitude: 0.5,
-      vibrationFrequency: 60,
-    },
   });
 
   const [machines, setMachines] = useState<Machine[]>([]);
@@ -69,7 +60,11 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
     chatService.getMachineDefaults(selectedMachineId).then(setSelectedMachine);
   }, [selectedMachineId]);
 
-  const handleSubmit = (data: SimulationData) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const form = document.getElementById("simulation-form") as HTMLFormElement;
+    const data = Object.fromEntries(new FormData(form));
+
     onSubmit(data);
   };
 
@@ -86,7 +81,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form id="simulation-form" onSubmit={handleSubmit} className="space-y-4">
         <h3 className="text-lg font-medium mb-2">Machine Simulation</h3>
 
         <FormField
@@ -95,7 +90,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Machine</FormLabel>
-              <Select onValueChange={handleChangeMachine} defaultValue={field.value}>
+              <Select onValueChange={handleChangeMachine} name="machine" defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select machine" />
@@ -119,6 +114,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
               <FormLabel>Air to Fuel Ratio</FormLabel>
               <FormControl>
                 <Input
+                  name="airToFuelRatio"
                   type="number"
                   step="0.1"
                   value={selectedMachine?.afr}
@@ -137,6 +133,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
               <FormLabel>Current (Amperes)</FormLabel>
               <FormControl>
                 <Input
+                  name="current"
                   type="number"
                   step="0.1"
                   value={selectedMachine?.current}
@@ -155,6 +152,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
               <FormLabel>Pressure (Pa)</FormLabel>
               <FormControl>
                 <Input
+                  name="pressure"
                   type="number"
                   value={selectedMachine?.pressure}
                   onChange={handleChange("pressure")}
@@ -172,6 +170,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
               <FormLabel>RPM</FormLabel>
               <FormControl>
                 <Input
+                  name="rpm"
                   type="number"
                   value={selectedMachine?.rpm}
                   onChange={handleChange("rpm")}
@@ -189,6 +188,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
               <FormLabel>Temperature (°C)</FormLabel>
               <FormControl>
                 <Input
+                  name="temperature"
                   type="number"
                   step="0.1"
                   value={selectedMachine?.temperature}
@@ -207,10 +207,30 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
               <FormLabel>Vibrations Max</FormLabel>
               <FormControl>
                 <Input
+                  name="vibrationAmplitude"
                   type="number"
                   step="0.01"
                   value={selectedMachine?.vibration_max}
                   onChange={handleChange("vibration_max")}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+      <FormField
+          control={form.control}
+          name="duration"
+          render={() => (
+            <FormItem>
+              <FormLabel>Duration</FormLabel>
+              <FormControl>
+                <Input
+                  name="duration"
+                  type="number"
+                  step="0.5"
+                  value={selectedMachine?.duration ?? 24}
+                  onChange={handleChange("duration")}
                 />
               </FormControl>
             </FormItem>

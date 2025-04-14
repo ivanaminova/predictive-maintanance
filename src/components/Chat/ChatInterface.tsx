@@ -52,6 +52,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     scrollToBottom();
   }, [messages, showSimulation]);
 
+  useEffect(() => {
+    console.log("🔍 Message is sending:", isSendingMessage);
+  }, [isSendingMessage]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -90,11 +94,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
         machine_id: "",
         simulation_data: {},
       });
+    } catch (err) {
+      response = err.message;
     } finally {
       setIsSendingMessage(false);
     }
 
-    // Simulate system response after a short delay
+    // adding response after a short delay
     setTimeout(() => {
       const newSystemMessage = {
         id: `system-${Date.now()}`,
@@ -105,7 +111,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
       };
       setMessages((prev) => [...prev, newSystemMessage]);
 
-      // Mark system message as animation complete after animation duration
+      // Mark message as animation complete after animation duration
       setTimeout(() => {
         setMessages((prev) =>
           prev.map((msg) =>
@@ -126,24 +132,21 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSimulationSubmit = async (data: any) => {
-    const formattedData = `
-      Simulation Data:
+    const formattedData = `Simulation Data:
       Machine: ${data.machine}
-      Air to Fuel Ratio: ${data.airToFuelRatio} ${
-      data.airToFuelRatio > 14.7 ? "(leaner)" : "(richer)"
-    }
-      Current: ${data.current} Amperes
-      Pressure: ${data.pressure} Pa
-      RPM: ${data.rpm}
-      Temperature: ${data.temperature}°C
-      Vibrations - Amplitude: ${data.vibrationAmplitude}, Frequency: ${
-      data.vibrationFrequency
-    }
+      Air to Fuel Ratio: ${data.airToFuelRatio} 
+      Current: ${data.current} Amperes 
+      Pressure: ${data.pressure} Pa 
+      RPM: ${data.rpm} 
+      Temperature: ${data.temperature}°C 
+      Vibrations: ${data.vibrationAmplitude} 
+      Duration: ${data.duration}
     `;
 
     const newMessage = {
       id: `user-${Date.now()}`,
       content: formattedData,
+      className: "whitespace-pre-line",
       sender: "user" as const,
       timestamp: new Date(),
       animationComplete: false,
@@ -162,7 +165,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
       );
     }, 300);
 
-    let response; // this is the response TODO:
+    // this is the response TODO:TODO:TODO:
+    let response;
 
     try {
       response = await chatService.postChatPrompt({
@@ -170,17 +174,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
         machine_id: selectedMachine.machine_id,
         simulation_data: selectedMachine,
       });
+
+      console.log(response);
     } catch (e) {
-    } finally {
-      setIsSendingMessage(false);
+      console.log(e.message)
     }
 
     // Simulate response
     setTimeout(() => {
       const responseMessage = {
         id: `system-${Date.now()}`,
-        content:
-          "Simulation data received. The machine parameters are within acceptable ranges.",
+        content: "Simulation data received. Running simulation...",
         sender: "system" as const,
         timestamp: new Date(),
         animationComplete: false,
@@ -197,6 +201,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
           )
         );
       }, 300);
+
+      //FIXME: second response
+      setTimeout(() => {
+        const simulationResponseMessage = {
+          id: `system-${Date.now()}`,
+          content: "This is the simulation response. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          sender: "system" as const,
+          timestamp: new Date(),
+          animationComplete: false,
+        };
+        setMessages((prev) => [...prev, simulationResponseMessage]);
+
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === simulationResponseMessage.id
+                ? { ...msg, animationComplete: true }
+                : msg
+            )
+          );
+        }, 300);
+        setIsSendingMessage(false);
+      }, 5000);
     }, 1000);
   };
 
@@ -234,7 +261,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
               className={cn(
                 "max-w-[75%] rounded-lg p-3 break-words transition-all duration-300",
                 message.sender === "user"
-                  ? "bg-primary text-primary-foreground ml-auto"
+                  ? "bg-primary text-primary-foreground ml-auto whitespace-pre-line"
                   : "bg-muted text-foreground",
                 !message.animationComplete && "opacity-0 translate-y-2",
                 message.animationComplete && "opacity-100 translate-y-0"

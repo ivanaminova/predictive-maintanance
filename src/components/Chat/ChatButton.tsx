@@ -5,7 +5,6 @@ import ChatInterface from './ChatInterface';
 
 const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
-  console.log(isOpen)
   return (
     <>
       <button

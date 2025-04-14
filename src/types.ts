@@ -13,4 +13,5 @@ export interface MachineDefaults {
   rpm: string;
   temperature: string;
   vibration_max: string;
+  duration: string;
 }

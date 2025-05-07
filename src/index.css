@@ -60,6 +60,10 @@ html, body {
     /*project card*/
     --project-name: 0 0% 97%;
     --project-muted: 0 0% 100% / 36%; 
+
+    /* progress bar: */
+    --project-progress: 200, 100%, 50%;
+    --project-progress-light: 200, 100%, 75%;
   }
 
   .dark {
@@ -104,6 +108,10 @@ html, body {
     /*project card*/
     --project-name: 0 0% 11%;
     --project-muted: 0, 0%, 13%; 
+
+    /* progress bar: */
+    --project-progress: 204, 100%, 40%;
+    --project-progress-light: 204, 100%, 60%; 
   }
   
   * {
@@ -156,4 +164,24 @@ input[type="number"] {
   .text-project-name {
     color: hsl(var(--project-name));
   }
+}
+
+/* --------------- */
+@keyframes diagonal-sheen {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.progress-animated {
+  background: linear-gradient(
+    45deg,
+    hsl(var(--project-progress)) 0%,
+    hsl(var(--project-progress-light)) 100% 
+  );
+  background-size: 200% 100%;
+  animation: diagonal-sheen 2s linear infinite;
 }

@@ -172,7 +172,7 @@ const ProjectDetails = () => {
                 </Button>
               )}
 
-              <Progress className="h-2 w-full" value={progress} />
+              <Progress className="h-3 w-full" value={progress} />
               <div className="text-xs mt-1">{progress}% complete</div>
             </div>
             <div className="flex flex-col gap-4">

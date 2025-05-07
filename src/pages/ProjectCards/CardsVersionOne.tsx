@@ -162,23 +162,7 @@ export const CardsVersionOne = () => {
                 Deploy Model
               </Button>
             )}
-
-            {completedTraining ? (
-              <Button
-                className="w-32 self-end"
-                onClick={() => navigate(`/dashboard/${id}`)}
-              >
-                View Dashboard
-              </Button>
-            ) : (
-              <Button
-                className="w-32 self-end"
-                disabled
-                onClick={() => navigate(`/dashboard/${id}`)}
-              >
-                View Dashboard
-              </Button>
-            )}
+            
           </div>
         </CardContent>
 

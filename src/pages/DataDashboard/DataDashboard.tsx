@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, AlertTriangle, Calendar } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,20 +8,29 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectDateRange
+  SelectDateRange,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveDataCharts from "./LiveDataCharts";
 import Failures from "./Failures";
 import Maintenance from "./Maintenance";
-
-const machines = ["Machine A", "Machine B", "Machine C", "Machine D"];
+import { Machine } from "@/types";
+import chatService from "@/services/chatService";
 
 const DataDashboard = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
-  const [selectedMachine, setSelectedMachine] = useState("Machine A");
   const [activeTab, setActiveTab] = useState("charts");
+  const [machines, setMachines] = useState<Machine[]>([]);
+  const [selectedMachineId, setSelectedMachineId] = useState<string>();
+
+  useEffect(() => {
+    chatService.getMachineList().then(setMachines);
+  }, []);
+
+  const handleChangeMachine = (id: string) => {
+    setSelectedMachineId(id);
+  };
 
   return (
     <div className="allow-scroll h-screen overflow-auto">
@@ -35,7 +44,7 @@ const DataDashboard = () => {
         <h2 className="text-xl font-medium">Data Dashboard</h2>
       </div>
 
-      <Card className="border border-border">
+      <Card className="border border-border pb-24">
         <CardHeader className="pb-0">
           <CardTitle className="text-lg flex items-center gap-2">
             <BarChart3 size={18} /> Machine Metrics
@@ -44,28 +53,22 @@ const DataDashboard = () => {
         <CardContent className="pt-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div className="space-y-2 w-full sm:w-auto">
-              <div className="flex flex-row gap-4">
-                <div>
+              <div className="flex flex-row gap-4 ">
+                <div className="w-56">
                   <label
                     htmlFor="machine-select"
                     className="text-sm font-medium"
                   >
                     Select Machine:
                   </label>
-                  <Select
-                    value={selectedMachine}
-                    onValueChange={setSelectedMachine}
-                  >
-                    <SelectTrigger
-                      id="machine-select"
-                      className="w-full sm:w-[240px]"
-                    >
-                      <SelectValue placeholder="Select Machine" />
+                  <Select onValueChange={handleChangeMachine} name="machine">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select machine" />
                     </SelectTrigger>
                     <SelectContent>
-                      {machines.map((machine) => (
-                        <SelectItem key={machine} value={machine}>
-                          {machine}
+                      {machines.map((m) => (
+                        <SelectItem key={m.machine_id} value={m.machine_id}>
+                          {m.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -110,15 +113,15 @@ const DataDashboard = () => {
             </TabsList>
 
             <TabsContent value="charts" className="mt-2">
-              <LiveDataCharts machine={selectedMachine} />
+              <LiveDataCharts machineId={selectedMachineId} />
             </TabsContent>
 
             <TabsContent value="failures" className="mt-2">
-              <Failures machine={selectedMachine} />
+              <Failures machine={selectedMachineId} />
             </TabsContent>
 
             <TabsContent value="maintenance" className="mt-2">
-              <Maintenance machine={selectedMachine} />
+              <Maintenance machine={selectedMachineId} />
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -20,11 +20,11 @@ export default function AppRoutes() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Navigate to="/manage" replace />} />
           <Route path="manage" element={<ManageModels />} />
+          <Route path="dashboard" element={<DataDashboard />} />
           <Route path="chat" element={<ChatPage />} />
           <Route path="settings" element={<Settings />} />
           <Route path="archived" element={<Archived />} />
           <Route path="project/:id" element={<ProjectDetails />} />
-          <Route path="dashboard/:projectId" element={<DataDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

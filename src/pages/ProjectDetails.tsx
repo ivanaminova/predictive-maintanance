@@ -69,9 +69,7 @@ const ProjectDetails = () => {
         </div>
         <h2 className="text-xl font-medium">{project.name}</h2>
       </div>
-      {/* <OldVersion/> */}
       <CardsVersionOne/>
-      {/* <CardsVersionTwo/> */}
     </div>
   );
 };

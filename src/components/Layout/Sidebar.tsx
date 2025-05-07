@@ -1,19 +1,18 @@
 
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FolderClosed, Settings, Archive, Plus, MessageCircle } from 'lucide-react';
+import { FolderClosed, Settings, Archive, Plus, MessageCircle, Gauge } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useProjects } from '@/context/ProjectContext';
 import CreateProjectModal from '@/components/Projects/CreateProjectModal';
 
 
 const Sidebar = () => {
-  const { projects } = useProjects();
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const menuItems = [
     { to: "#", icon: <Plus size={18} />, label: "Create Project", onClick: () => setIsModalOpen(true) },
     { to: "/manage", icon: <FolderClosed size={18} />, label: "Projects" },
+    { to: "/dashboard", icon: <Gauge size={18} />, label: "Data Dashboard" },
     { to: "/chat", icon: <MessageCircle size={18} />, label: "Chat" },
     { to: "/settings", icon: <Settings size={18} />, label: "Settings" },
     { to: "/archived", icon: <Archive size={18} />, label: "Archived" },

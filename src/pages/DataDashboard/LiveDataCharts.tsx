@@ -14,18 +14,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, TrendingUp } from 'lucide-react';
 
 interface LiveDataChartsProps {
-  machine: string;
+  machineId: string;
 }
 
-const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machine }) => {
+const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
   // Sample data for charts
   const generateData = (type: string) => {
     const baseValue = {
-      'Machine A': { temp: 24, pressure: 92, vibrations: 1.5, oil: 80 },
-      'Machine B': { temp: 18, pressure: 88, vibrations: 2.2, oil: 75 },
-      'Machine C': { temp: 29, pressure: 95, vibrations: 1.8, oil: 65 },
-      'Machine D': { temp: 21, pressure: 90, vibrations: 1.2, oil: 90 }
-    }[machine];
+      'M001': { temp: 24, pressure: 92, vibrations: 1.5, oil: 80 },
+      'M002': { temp: 18, pressure: 88, vibrations: 2.2, oil: 75 },
+      'M003': { temp: 29, pressure: 95, vibrations: 1.8, oil: 65 },
+      'M004': { temp: 21, pressure: 90, vibrations: 1.2, oil: 90 },
+      'M005': { temp: 23, pressure: 89, vibrations: 1.6, oil: 85 },
+      'M006': { temp: 26, pressure: 93, vibrations: 1.7, oil: 70 },
+      'M007': { temp: 19, pressure: 87, vibrations: 2.0, oil: 78 },
+      'M008': { temp: 25, pressure: 94, vibrations: 1.4, oil: 82 },
+      'M009': { temp: 22, pressure: 91, vibrations: 1.9, oil: 77 },
+      'M010': { temp: 27, pressure: 96, vibrations: 1.3, oil: 88 },
+    }[machineId] ?? { temp: 22, pressure: 90, vibrations: 1.5, oil: 80 };
     
     return Array.from({ length: 10 }, (_, i) => {
       let value;

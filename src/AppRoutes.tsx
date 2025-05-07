@@ -7,8 +7,8 @@ import Archived from "./pages/Archived";
 import ProjectDetails from "./pages/ProjectDetails";
 import DataDashboard from "./pages/DataDashboard/DataDashboard";
 import NotFound from "./pages/NotFound";
-import ChatButton from "./components/Chat/ChatButton";
-import { ChatPage } from "./components/Chat/ChatPage";
+import ChatButton from "./pages/Chat/ChatButton";
+import { ChatPage } from "./pages/Chat/ChatPage";
 
 export default function AppRoutes() {
   const location = useLocation();

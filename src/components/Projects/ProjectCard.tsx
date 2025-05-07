@@ -45,12 +45,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onDelete }) =
         style={{ animationDelay: `${index * 0.1}s` }}
       >
         <div className="flex justify-between items-start mb-4">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-project-name">
             {project.name.charAt(0).toUpperCase()}
           </div>
           <button 
             onClick={handleDelete}
-            className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded-full hover:bg-muted"
+            className="text-project-name hover:text-destructive transition-colors p-1 rounded-full hover:bg-muted"
             aria-label="Delete project"
           >
             <Trash2 size={16} />
@@ -58,14 +58,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onDelete }) =
         </div>
         
         <div className="flex-1 flex flex-col items-center justify-center">
-          <h3 className="text-lg font-medium text-[#f2f3f4]">{project.name}</h3>
+          <h3 className="text-lg font-medium text-project-name">{project.name}</h3>
         </div>
         
         <div className="flex justify-between items-center mt-4">
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-project-muted">
             {project.createdAt}
           </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-project-muted">
             <Box size={12} />
             <span>Project</span>
           </div>

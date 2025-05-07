@@ -24,7 +24,7 @@ const DataDashboard = () => {
   const [activeTab, setActiveTab] = useState("charts");
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="allow-scroll h-screen overflow-auto">
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate(`/project/${projectId}`)}

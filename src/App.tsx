@@ -12,7 +12,7 @@ import ProjectDetails from "./pages/ProjectDetails";
 import DataDashboard from "./pages/DataDashboard/DataDashboard";
 import NotFound from "./pages/NotFound";
 import ChatButton from "./components/Chat/ChatButton";
-
+import { ChatPage } from "./components/Chat/ChatPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Navigate to="/manage" replace />} />
             <Route path="manage" element={<ManageModels />} />
+            <Route path="chat" element={<ChatPage />} />
             <Route path="settings" element={<Settings />} />
             <Route path="archived" element={<Archived />} />
             <Route path="project/:id" element={<ProjectDetails />} />

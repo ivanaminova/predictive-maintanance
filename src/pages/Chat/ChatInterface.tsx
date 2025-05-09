@@ -3,7 +3,7 @@ import { X, Send, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import SimulationForm from "./SimulationForm";
-import chatService from "@/services/chatService";
+import apiService from "@/services/apiService";
 import { MachineDefaults } from "@/types";
 
 interface ChatMessage {
@@ -52,10 +52,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     scrollToBottom();
   }, [messages, showSimulation]);
 
-  useEffect(() => {
-    console.log("🔍 Message is sending:", isSendingMessage);
-  }, [isSendingMessage]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -89,7 +85,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     let response;
 
     try {
-      response = await chatService.postChatPrompt({
+      response = await apiService.postChatPrompt({
         message: inputValue,
         machine_id: "",
         simulation_data: {},
@@ -169,7 +165,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     let response;
 
     try {
-      response = await chatService.postChatPrompt({
+      response = await apiService.postChatPrompt({
         message: "__simulation_run",
         machine_id: selectedMachine.machine_id,
         simulation_data: selectedMachine,
@@ -177,7 +173,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
 
       console.log(response);
     } catch (e) {
-      console.log(e.message)
+      console.log(e.message);
     }
 
     // Simulate response
@@ -206,7 +202,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
       setTimeout(() => {
         const simulationResponseMessage = {
           id: `system-${Date.now()}`,
-          content: "This is the simulation response. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          content:
+            "This is the simulation response. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
           sender: "system" as const,
           timestamp: new Date(),
           animationComplete: false,

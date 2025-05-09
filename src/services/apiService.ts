@@ -1,5 +1,6 @@
 import { Machine, MachineDefaults } from "@/types";
 import request from "./request";
+import { fi } from "date-fns/locale";
 
 export default {
   getMachineList() {
@@ -14,28 +15,27 @@ export default {
   postChatPrompt(propmtMessage) {
     return request("POST", `/chat`, propmtMessage);
   },
+  uploadFiles(files) {
+    return fetch(`/files/upload`, {
+      method: 'POST',
+      body: files
+    });
+  },
+  trainModel() {
+    return request("POST", `/files/run-script`);
+  },
+  getProgress() {
+    return request("GET", `/files/progress`);
+  },
+  deployModel() {
+    return request("POST", `/files/deploy-model`);
+  },
 };
 
 
 //GET http://10.25.83.50:5000/machine_list
 //GET http://10.25.83.50:5000/machine_defaults?machine_id=${machineId}
 //POST http://10.25.83.50:5005/chat
-
-// TODO: za /chat
-// {
-//     "message": "__simulation_run",
-//     "machine_id": "М015",
-//     "simulation_data": {}
-// }
-
-
-// {
-// "message":"__simulation_run",'
-// "machine_id":"М015",
-// "simulation_data": {"afr":"12.65","current":"35.0","machine_id":"M002","machine_name":"Machine M002","machine_type":"Industrial Pump","pressure":"5.5","rpm":"3200.0","temperature":"87.5","vibration_max":"9.0"}}
-
-// {
-//     "message": "Hello",
-//     "machine_id": "",
-//     "simulation_data": {}
-// }
+//POST http://10.25.83.50:5010/upload
+//GET http://10.25.83.50:5010/progress
+//POST http://10.25.83.50:5010/run-script

@@ -15,7 +15,7 @@ import LiveDataCharts from "./LiveDataCharts";
 import Failures from "./Failures";
 import Maintenance from "./Maintenance";
 import { Machine } from "@/types";
-import chatService from "@/services/chatService";
+import apiService from "@/services/apiService";
 
 const DataDashboard = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const DataDashboard = () => {
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
 
   useEffect(() => {
-    chatService.getMachineList().then(setMachines);
+    apiService.getMachineList().then(setMachines);
   }, []);
 
   const handleChangeMachine = (id: string) => {

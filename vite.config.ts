@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => ({
       '/chat': {
         target: 'http://10.25.83.50:5005/chat',
         rewrite: (path) => path.replace(/^\/chat/, '')
+      },
+      '/files': {
+        target: 'http://10.25.83.50:5010',
+        rewrite: (path) => path.replace(/^\/files/, '')
       }
     }
   },

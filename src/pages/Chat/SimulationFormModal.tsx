@@ -26,7 +26,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Machine, MachineDefaults } from "@/types";
-import chatService from "@/services/chatService";
+import apiService from "@/services/apiService";
 import { SquareChartGantt } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -68,13 +68,13 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
 
   useEffect(() => {
-    chatService.getMachineList().then(setMachines);
+    apiService.getMachineList().then(setMachines);
   }, []);
 
   useEffect(() => {
     if (!selectedMachineId) return;
 
-    chatService.getMachineDefaults(selectedMachineId).then(setSelectedMachine);
+    apiService.getMachineDefaults(selectedMachineId).then(setSelectedMachine);
   }, [selectedMachineId]);
 
   const handleChangeMachine = (id: string) => {
@@ -87,15 +87,14 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
         ...prev,
         [name]: e.target.value,
       }));
-  };
-
+    };
 
   const onValidSubmit = (data) => {
     onSubmit(data); // same logic you have, but only if valid!
   };
 
   const onInvalidSubmit = (errors) => {
-    console.log("Form has errors:", errors);  // Optional: debug
+    console.log("Form has errors:", errors); // Optional: debug
     // No need to manually block anything — it won’t call onValidSubmit if invalid
   };
 
@@ -117,7 +116,7 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
         <Form {...form}>
           <form
             id="simulation-form"
-            onSubmit={form.handleSubmit(onValidSubmit, onInvalidSubmit)} 
+            onSubmit={form.handleSubmit(onValidSubmit, onInvalidSubmit)}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {/* MACHINE SELECT */}

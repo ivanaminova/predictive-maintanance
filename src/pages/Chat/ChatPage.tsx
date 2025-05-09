@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import chatService from "@/services/chatService";
+import apiService from "@/services/apiService";
 import { MachineDefaults } from "@/types";
 import SimulationFormModal from "./SimulationFormModal";
 
@@ -28,7 +28,7 @@ export const ChatPage = () => {
   const [selectedMachine, setSelectedMachine] = useState<MachineDefaults>();
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isSimulationModalOpen, setSimulationModalOpen] = useState(false);
-  
+
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([
@@ -46,10 +46,6 @@ export const ChatPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, showSimulation]);
-
-  useEffect(() => {
-    console.log("🔍 Message is sending:", isSendingMessage);
-  }, [isSendingMessage]);
 
   const scrollToBottom = () => {
     const container = document.querySelector(".overflow-y-auto");
@@ -87,7 +83,7 @@ export const ChatPage = () => {
     let response;
 
     try {
-      response = await chatService.postChatPrompt({
+      response = await apiService.postChatPrompt({
         message: inputValue,
         machine_id: "",
         simulation_data: {},
@@ -168,7 +164,7 @@ export const ChatPage = () => {
     let response;
 
     try {
-      response = await chatService.postChatPrompt({
+      response = await apiService.postChatPrompt({
         message: "__simulation_run",
         machine_id: selectedMachine.machine_id,
         simulation_data: selectedMachine,

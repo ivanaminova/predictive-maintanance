@@ -17,7 +17,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Machine, MachineDefaults } from "@/types";
-import chatService from "@/services/chatService";
+import apiService from "@/services/apiService";
 
 interface SimulationFormProps {
   selectedMachine: MachineDefaults;
@@ -35,7 +35,7 @@ interface SimulationData {
   temperature: number;
   vibrationAmplitude: number;
   vibrationFrequency: number;
-  duration: number
+  duration: number;
 }
 
 const SimulationForm: React.FC<SimulationFormProps> = ({
@@ -44,20 +44,19 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const form = useForm<SimulationData>({
-  });
+  const form = useForm<SimulationData>({});
 
   const [machines, setMachines] = useState<Machine[]>([]);
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
 
   useEffect(() => {
-    chatService.getMachineList().then(setMachines);
+    apiService.getMachineList().then(setMachines);
   }, []);
 
   useEffect(() => {
     if (!selectedMachineId) return;
 
-    chatService.getMachineDefaults(selectedMachineId).then(setSelectedMachine);
+    apiService.getMachineDefaults(selectedMachineId).then(setSelectedMachine);
   }, [selectedMachineId]);
 
   const handleSubmit = (e) => {
@@ -70,14 +69,15 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
   const handleChangeMachine = (id: string) => {
     setSelectedMachineId(id);
-  }
+  };
 
-  const handleChange = (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedMachine((prev) => ({
-      ...prev,
-      [name]: e.target.value
-    }))
-  }
+  const handleChange =
+    (name: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSelectedMachine((prev) => ({
+        ...prev,
+        [name]: e.target.value,
+      }));
+    };
 
   return (
     <Form {...form}>
@@ -90,16 +90,22 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Machine</FormLabel>
-              <Select onValueChange={handleChangeMachine} name="machine" defaultValue={field.value}>
+              <Select
+                onValueChange={handleChangeMachine}
+                name="machine"
+                defaultValue={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select machine" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {machines.map((m) => 
-                  <SelectItem key={m.machine_id} value={m.machine_id}>{m.name}</SelectItem>
-                )}
+                  {machines.map((m) => (
+                    <SelectItem key={m.machine_id} value={m.machine_id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </FormItem>
@@ -218,7 +224,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
           )}
         />
 
-      <FormField
+        <FormField
           control={form.control}
           name="duration"
           render={() => (

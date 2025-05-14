@@ -1,42 +1,50 @@
-
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { WrenchIcon } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { WrenchIcon } from "lucide-react";
+import apiService from "@/services/apiService";
 
 interface MaintenanceProps {
-  machine: string;
+  machineId: string;
 }
 
-const Maintenance: React.FC<MaintenanceProps> = ({ machine }) => {
-  const maintenanceSchedules = [
-    {
-      date: '2023-03-04',
-      type: 'Routine Check'
-    },
-    {
-      date: '2023-03-05',
-      type: 'Calibration'
-    },
-    {
-      date: '2023-03-06',
-      type: 'Software Update'
-    }
-  ];
+interface Maintenance {
+  Machine_ID: string;
+  Timestamp: string;
+  Maintenance_Action: string;
+}
+
+const Maintenance: React.FC<MaintenanceProps> = ({ machineId }) => {
+  const [maintenances, setMaintenances] = useState<Maintenance[]>([]);
+
+  useEffect(() => {
+    apiService
+      .getMaintenanceForMachine(machineId)
+      .then((data) => setMaintenances(data as Maintenance[]));
+  }, [machineId]);
+
+  console.log(machineId);
+  console.log(maintenances);
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Scheduled & Past Maintenance</h3>
-      
+
       <div className="space-y-4">
-        {maintenanceSchedules.map((schedule, index) => (
-          <Card key={index} className="border border-primary/20 hover:border-primary/40 transition-colors">
+        {maintenances.map((m) => (
+          <Card
+            key={m.Machine_ID}
+            className="border border-primary/20 hover:border-primary/40 transition-colors"
+          >
             <CardContent className="p-4 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <WrenchIcon size={16} className="text-primary" />
-                <div className="text-sm font-medium">Date: <span className="font-normal">{schedule.date}</span></div>
+                <div className="text-sm font-medium">
+                  Date: <span className="font-normal">{m.Timestamp}</span>
+                </div>
               </div>
               <div className="pl-6 text-sm">
-                Type: <span className="text-primary">{schedule.type}</span>
+                Type:{" "}
+                <span className="text-primary">{m.Maintenance_Action}</span>
               </div>
             </CardContent>
           </Card>

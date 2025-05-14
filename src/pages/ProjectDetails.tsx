@@ -373,7 +373,7 @@ const ProjectDetails = () => {
               className={cn(
                 "border-2 border-dashed border-border rounded-md py-8 px-4 text-center transition-colors",
                 dragActive ? "border-primary bg-primary/5" : "",
-                !phaseTrain ? "opacity-50 pointer-events-none" : "", // disable upload when training
+                phaseTrain ? "opacity-50 pointer-events-none" : "", // disable upload when training
                 phaseDeploy ? "opacity-50 pointer-events-none" : "" // disable upload when deploying
               )}
               onDragEnter={handleDrag}

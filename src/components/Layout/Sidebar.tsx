@@ -14,8 +14,8 @@ const Sidebar = () => {
     { to: "/manage", icon: <FolderClosed size={18} />, label: "Projects" },
     { to: "/dashboard", icon: <Gauge size={18} />, label: "Data Dashboard" },
     { to: "/chat", icon: <MessageCircle size={18} />, label: "Chat" },
-    { to: "/settings", icon: <Settings size={18} />, label: "Settings" },
     { to: "/archived", icon: <Archive size={18} />, label: "Archived" },
+    { to: "/settings", icon: <Settings size={18} />, label: "Settings" },
   ];
 
   return (

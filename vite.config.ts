@@ -19,6 +19,10 @@ export default defineConfig(({ mode }) => ({
       '/files': {
         target: 'http://10.25.83.50:5010',
         rewrite: (path) => path.replace(/^\/files/, '')
+      },
+      '/live-data': {
+        target: 'http://10.25.83.50:5005',
+        rewrite: (path) => path.replace(/^\/live-data/, '')
       }
     }
   },

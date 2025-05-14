@@ -32,6 +32,13 @@ const DataDashboard = () => {
     setSelectedMachineId(id);
   };
 
+  const projects = [
+    { project_id: "1", name: "My First project" },
+    { project_id: "2", name: "Test Project" },
+    { project_id: "3", name: "Project" },
+    { project_id: "4", name: "another projec I made" }
+  ];
+
   return (
     <div className="allow-scroll h-screen overflow-auto">
       <div className="flex items-center gap-4 mb-6">
@@ -54,6 +61,26 @@ const DataDashboard = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div className="space-y-2 w-full sm:w-auto">
               <div className="flex flex-row gap-4 ">
+                <div className="w-56">
+                  <label
+                    htmlFor="machine-select"
+                    className="text-sm font-medium"
+                  >
+                    Select Project:
+                  </label>
+                  <Select onValueChange={handleChangeMachine} name="machine">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects.map((p) => (
+                        <SelectItem key={p.project_id} value={p.project_id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="w-56">
                   <label
                     htmlFor="machine-select"
@@ -117,11 +144,11 @@ const DataDashboard = () => {
             </TabsContent>
 
             <TabsContent value="failures" className="mt-2">
-              <Failures machine={selectedMachineId} />
+              <Failures machineId={selectedMachineId} />
             </TabsContent>
 
             <TabsContent value="maintenance" className="mt-2">
-              <Maintenance machine={selectedMachineId} />
+              <Maintenance machineId={selectedMachineId} />
             </TabsContent>
           </Tabs>
         </CardContent>

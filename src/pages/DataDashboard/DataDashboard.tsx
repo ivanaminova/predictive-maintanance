@@ -109,11 +109,6 @@ const DataDashboard = () => {
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 text-amber-500 text-sm w-full sm:w-auto justify-end">
-              <AlertTriangle size={16} />
-              <span>3 alerts in the last 24 hours</span>
-            </div>
           </div>
 
           <Tabs

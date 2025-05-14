@@ -1,6 +1,5 @@
 import { Machine, MachineDefaults } from "@/types";
 import request from "./request";
-import { fi } from "date-fns/locale";
 
 export default {
   getMachineList() {

@@ -1,58 +1,94 @@
-import React from 'react';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import React, { useEffect, useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   LineChart,
-  Line
-} from 'recharts';
+  Line,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, TrendingUp } from 'lucide-react';
+import { AlertTriangle, TrendingUp } from "lucide-react";
+import apiService from "@/services/apiService";
 
 interface LiveDataChartsProps {
   machineId: string;
 }
 
-const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
-  // Sample data for charts
-  const generateData = (type: string) => {
-    const baseValue = {
-      'M001': { temp: 24, pressure: 92, vibrations: 1.5, oil: 80 },
-      'M002': { temp: 18, pressure: 88, vibrations: 2.2, oil: 75 },
-      'M003': { temp: 29, pressure: 95, vibrations: 1.8, oil: 65 },
-      'M004': { temp: 21, pressure: 90, vibrations: 1.2, oil: 90 },
-      'M005': { temp: 23, pressure: 89, vibrations: 1.6, oil: 85 },
-      'M006': { temp: 26, pressure: 93, vibrations: 1.7, oil: 70 },
-      'M007': { temp: 19, pressure: 87, vibrations: 2.0, oil: 78 },
-      'M008': { temp: 25, pressure: 94, vibrations: 1.4, oil: 82 },
-      'M009': { temp: 22, pressure: 91, vibrations: 1.9, oil: 77 },
-      'M010': { temp: 27, pressure: 96, vibrations: 1.3, oil: 88 },
-    }[machineId] ?? { temp: 22, pressure: 90, vibrations: 1.5, oil: 80 };
-    
-    return Array.from({ length: 10 }, (_, i) => {
-      let value;
-      const noise = Math.sin(i * 0.5) * 3 + Math.random() * 1.5;
-      
-      if (type === 'temperature') value = baseValue.temp + noise;
-      else if (type === 'pressure') value = baseValue.pressure + noise;
-      else if (type === 'vibrations') value = baseValue.vibrations + noise * 0.2;
-      else if (type === 'oil') value = baseValue.oil + noise;
-      
-      return {
-        time: `${i+1} min`,
-        value: Number(value.toFixed(1))
-      };
-    });
-  };
+interface LiveData {
+  Machine_ID: string;
+  Timestamp: string;
+  AFR: number;
+  Current: number;
+  Pressure: number;
+  RPM: number;
+  Temperature: number;
+  Vibration: number;
+}
 
-  const temperatureData = generateData('temperature');
-  const pressureData = generateData('pressure');
-  const vibrationsData = generateData('vibrations');
-  const oilData = generateData('oil');
+const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
+  const [metrics, setMetrics] = useState<LiveData[]>([]);
+
+  useEffect(() => {
+    apiService
+      .getSensorDataForMachine(machineId)
+      .then((data) => setMetrics(data as LiveData[]));
+  }, [machineId]);
+
+  const sortedData = [...metrics].sort(
+    (a, b) => new Date(a.Timestamp).getTime() - new Date(b.Timestamp).getTime()
+  );
+
+  const AFRData = sortedData.map((entry) => ({
+    time: new Date(entry.Timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    value: entry.AFR,
+  }));
+
+  const currentData = sortedData.map((entry) => ({
+    time: new Date(entry.Timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    value: entry.Current,
+  }));
+
+  const pressureData = sortedData.map((entry) => ({
+    time: new Date(entry.Timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    value: entry.Pressure,
+  }));
+
+  const RPMtData = sortedData.map((entry) => ({
+    time: new Date(entry.Timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    value: entry.RPM,
+  }));
+
+  const temperatureData = sortedData.map((entry) => ({
+    time: new Date(entry.Timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    value: entry.Temperature,
+  }));
+
+  const vibrarionData = sortedData.map((entry) => ({
+    time: new Date(entry.Timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    value: entry.Vibration,
+  }));
 
   return (
     <div className="space-y-6">
@@ -60,41 +96,94 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
         <Card className="border border-border overflow-hidden shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center justify-between">
-              <span>Temperature (°C)</span>
+              <span>AFR</span>
               <TrendingUp size={16} className="text-amber-500" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={temperatureData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+                <AreaChart
+                  data={AFRData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                >
                   <defs>
-                    <linearGradient id="temperature" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ff9800" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#ff9800" stopOpacity={0}/>
+                    <linearGradient
+                      id="temperature"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#ff9800" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#ff9800" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
+                  />
                   <XAxis dataKey="time" stroke="#888" />
                   <YAxis domain={[15, 35]} stroke="#888" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                    labelStyle={{ color: '#fff' }}
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
+                    }}
+                    labelStyle={{ color: "#fff" }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#ff9800" 
-                    strokeWidth={2} 
-                    fill="url(#temperature)" 
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#ff9800"
+                    strokeWidth={2}
+                    fill="url(#temperature)"
                     animationDuration={300}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-2 flex items-center text-amber-500 gap-1 text-sm">
-              <AlertTriangle size={14} />
-              <span>Warning: Temperature spike detected</span>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border overflow-hidden shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center justify-between">
+              <span>Current</span>
+              <TrendingUp size={16} className="text-green-500" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={currentData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
+                  />
+                  <XAxis dataKey="time" stroke="#888" />
+                  <YAxis domain={[80, 100]} stroke="#888" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#4caf50"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                    animationDuration={300}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -103,24 +192,33 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center justify-between">
               <span>Pressure (PSI)</span>
-              <TrendingUp size={16} className="text-green-500" />
+              <TrendingUp size={16} className="text-blue-500" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={pressureData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="time" stroke="#888" />
-                  <YAxis domain={[80, 100]} stroke="#888" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                    labelStyle={{ color: '#fff' }}
+                <LineChart
+                  data={pressureData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#4caf50" 
+                  <XAxis dataKey="time" stroke="#888" />
+                  <YAxis domain={[0, 4]} stroke="#888" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#2196f3"
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     activeDot={{ r: 5 }}
@@ -129,9 +227,99 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-2 flex items-center text-green-500 gap-1 text-sm">
-              <AlertTriangle size={14} className="opacity-0" />
-              <span>Pressure within normal range</span>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border overflow-hidden shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center justify-between">
+              <span>RPM</span>
+              <TrendingUp size={16} className="text-purple-500" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={RPMtData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                >
+                  <defs>
+                    <linearGradient id="oil" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#673ab7" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#673ab7" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
+                  />
+                  <XAxis dataKey="time" stroke="#888" />
+                  <YAxis domain={[50, 100]} stroke="#888" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#673ab7"
+                    strokeWidth={2}
+                    fill="url(#oil)"
+                    animationDuration={300}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border overflow-hidden shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center justify-between">
+              <span>Temperature</span>
+              <TrendingUp size={16} className="text-purple-500" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={temperatureData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                >
+                  <defs>
+                    <linearGradient id="oil" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#673ab7" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#673ab7" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
+                  />
+                  <XAxis dataKey="time" stroke="#888" />
+                  <YAxis domain={[50, 100]} stroke="#888" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
+                    }}
+                    labelStyle={{ color: "#fff" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#673ab7"
+                    strokeWidth={2}
+                    fill="url(#oil)"
+                    animationDuration={300}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -140,77 +328,45 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center justify-between">
               <span>Vibrations (mm/s)</span>
-              <TrendingUp size={16} className="text-blue-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={vibrationsData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="time" stroke="#888" />
-                  <YAxis domain={[0, 4]} stroke="#888" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                    labelStyle={{ color: '#fff' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#2196f3" 
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 5 }}
-                    animationDuration={300}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-2 flex items-center text-blue-500 gap-1 text-sm">
-              <AlertTriangle size={14} className="opacity-0" />
-              <span>Vibrations within normal range</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-border overflow-hidden shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>Oil Level (%)</span>
               <TrendingUp size={16} className="text-purple-500" />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={oilData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+                <AreaChart
+                  data={vibrarionData}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                >
                   <defs>
                     <linearGradient id="oil" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#673ab7" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#673ab7" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#673ab7" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#673ab7" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.1)"
+                  />
                   <XAxis dataKey="time" stroke="#888" />
                   <YAxis domain={[50, 100]} stroke="#888" />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                    labelStyle={{ color: '#fff' }}
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      border: "none",
+                    }}
+                    labelStyle={{ color: "#fff" }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#673ab7" 
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#673ab7"
                     strokeWidth={2}
-                    fill="url(#oil)" 
+                    fill="url(#oil)"
                     animationDuration={300}
                   />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
-            <div className="mt-2 flex items-center text-purple-500 gap-1 text-sm">
-              <AlertTriangle size={14} className="opacity-0" />
-              <span>Oil level within normal range</span>
             </div>
           </CardContent>
         </Card>

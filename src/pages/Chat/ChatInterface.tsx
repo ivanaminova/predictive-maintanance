@@ -1,14 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Send, Settings } from "lucide-react";
+import { X, Send, Settings, TrendingUpDown, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import SimulationForm from "./SimulationForm";
+import PredictionForm from "./PredictionForm";
 import apiService from "@/services/apiService";
 import { MachineDefaults } from "@/types";
 
 interface ChatMessage {
   id: string;
-  content: string;
+  content:
+    | string
+    | {
+        type: "health_check";
+        data: any;
+      };
   sender: "user" | "system";
   timestamp: Date;
   animationComplete?: boolean;
@@ -29,6 +35,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [showSimulation, setShowSimulation] = useState(false);
+  const [showPrediction, setShowPrediction] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedMachine, setSelectedMachine] = useState<MachineDefaults>();
   const [isSendingMessage, setIsSendingMessage] = useState(false);
@@ -150,6 +157,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
 
     setMessages((prev) => [...prev, newMessage]);
     setShowSimulation(false);
+    setShowPrediction(false);
 
     // Mark message as animation complete after animation duration
     setTimeout(() => {
@@ -224,6 +232,131 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     }, 1000);
   };
 
+  const handlePredictionSubmit = async (data: any) => {
+    const newMessage = {
+      id: `user-${Date.now()}`,
+      content: "Prediction for " + data.machine,
+      className: "whitespace-pre-line",
+      sender: "user" as const,
+      timestamp: new Date(),
+      animationComplete: false,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setShowSimulation(false);
+    setShowPrediction(false);
+
+    setTimeout(() => {
+      setIsSendingMessage(true);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === newMessage.id ? { ...msg, animationComplete: true } : msg
+        )
+      );
+    }, 300);
+
+    console.log(data);
+
+    let response;
+
+    try {
+      response = await apiService.postChatPrompt({
+        message: "__predict_failure",
+        machine_id: selectedMachine.machine_id,
+      });
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+
+    setTimeout(() => {
+      setTimeout(() => {
+        const predictionResponseMessage = {
+          id: `system-${Date.now()}`,
+          content: response,
+          sender: "system" as const,
+          timestamp: new Date(),
+          animationComplete: false,
+        };
+        setMessages((prev) => [...prev, predictionResponseMessage]);
+
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === predictionResponseMessage.id
+                ? { ...msg, animationComplete: true }
+                : msg
+            )
+          );
+        }, 300);
+        setIsSendingMessage(false);
+      }, 5000);
+    }, 1000);
+  };
+
+  const handleHealthCheck = async () => {
+    const newMessage = {
+      id: `user-${Date.now()}`,
+      content: "Conduct a system health check.",
+      className: "whitespace-pre-line",
+      sender: "user" as const,
+      timestamp: new Date(),
+      animationComplete: false,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setShowSimulation(false);
+
+    setTimeout(() => {
+      setIsSendingMessage(true);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === newMessage.id ? { ...msg, animationComplete: true } : msg
+        )
+      );
+    }, 300);
+
+    let response;
+
+    try {
+      response = await apiService.postChatPrompt({
+        message: "__system_health",
+      });
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+
+    setTimeout(() => {
+      setTimeout(() => {
+        const healthResponseMessage = {
+          id: `system-${Date.now()}`,
+          content: {
+            type: "health_check" as const,
+            data: response,
+          },
+          sender: "system" as const,
+          timestamp: new Date(),
+          animationComplete: false,
+        };
+        setMessages((prev) => [...prev, healthResponseMessage]);
+
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === healthResponseMessage.id
+                ? { ...msg, animationComplete: true }
+                : msg
+            )
+          );
+        }, 300);
+        setIsSendingMessage(false);
+      }, 5000);
+    }, 1000);
+  };
+
+  console.log(showSimulation);
+
   return (
     <div
       className={cn(
@@ -247,63 +380,129 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Messages Area */}
-      {!showSimulation ? (
-        <div
-          className="flex-1 overflow-y-auto p-3 space-y-4"
-          style={{ scrollBehavior: "smooth" }}
-        >
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={cn(
-                "max-w-[75%] rounded-lg p-3 break-words transition-all duration-300",
-                message.sender === "user"
-                  ? "bg-primary text-primary-foreground ml-auto whitespace-pre-line"
-                  : "bg-muted text-foreground",
-                !message.animationComplete && "opacity-0 translate-y-2",
-                message.animationComplete && "opacity-100 translate-y-0"
-              )}
-            >
-              <p className="text-sm">{message.content}</p>
-              <p className="text-xs opacity-70 mt-1">
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
-          ))}
-          {isSendingMessage && (
-            <div className="flex items-center space-x-1">
-              <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0s]"></span>
-              <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-              <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto p-3">
-          <SimulationForm
-            selectedMachine={selectedMachine}
-            setSelectedMachine={setSelectedMachine}
-            onSubmit={handleSimulationSubmit}
-            onCancel={() => setShowSimulation(false)}
-          />
-        </div>
+      {!(showSimulation || showPrediction) && (
+        <>
+          <div
+            className="flex-1 overflow-y-auto p-3 space-y-4"
+            style={{ scrollBehavior: "smooth" }}
+          >
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  "max-w-[75%] rounded-lg p-3 break-words transition-all duration-300",
+                  message.sender === "user"
+                    ? "bg-primary text-primary-foreground ml-auto whitespace-pre-line"
+                    : "bg-muted text-foreground",
+                  !message.animationComplete && "opacity-0 translate-y-2",
+                  message.animationComplete && "opacity-100 translate-y-0"
+                )}
+              >
+                {typeof message.content === "object" &&
+                message.content.type === "health_check" ? (
+                  <div className="text-sm leading-relaxed">
+                    <strong>Agents</strong>
+                    <br />
+                    Data Agent: {message.content.data.agents.data_agent}
+                    <br />
+                    Prediction Agent:{" "}
+                    {message.content.data.agents.prediction_agent}
+                    <br />
+                    Simulation Agent:{" "}
+                    {message.content.data.agents.simulation_agent}
+                    <br />
+                    <br />
+                    <strong>System Info</strong>
+                    <br />
+                    Status: {message.content.data.status}
+                    <br />
+                    Timestamp: {message.content.data.timestamp}
+                    <br />
+                    Version: {message.content.data.version}
+                  </div>
+                ) : typeof message.content === "string" ? (
+                  <p className="text-sm whitespace-pre-line">
+                    {message.content}
+                  </p>
+                ) : null}
+                <p className="text-xs opacity-70 mt-1">
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            ))}
+            {isSendingMessage && (
+              <div className="flex items-center space-x-1">
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0s]"></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </>
       )}
+
+      <>
+        {showSimulation && (
+          <div className="flex-1 overflow-y-auto p-3">
+            <SimulationForm
+              selectedMachine={selectedMachine}
+              setSelectedMachine={setSelectedMachine}
+              onSubmit={handleSimulationSubmit}
+              onCancel={() => setShowSimulation(false)}
+            />
+          </div>
+        )}
+        {showPrediction && (
+          <div className="flex-1 overflow-y-auto p-3">
+            <PredictionForm
+              selectedMachine={selectedMachine}
+              setSelectedMachine={setSelectedMachine}
+              onSubmit={handlePredictionSubmit}
+              onCancel={() => setShowPrediction(false)}
+            />
+          </div>
+        )}
+      </>
 
       {/* Input Area */}
       <div className="p-3 border-t border-border bg-card/80">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex gap-4 items-center mb-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowSimulation(true)}
+            onClick={() => {
+              setShowPrediction(false);
+              setShowSimulation(true);
+            }}
             className="text-xs px-2 py-1 h-auto bg-muted hover:bg-muted/80 transition-colors"
           >
             <Settings size={14} className="mr-1" />
             Simulation
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setShowSimulation(false);
+              setShowPrediction(true);
+            }}
+            className="text-xs px-2 py-1 h-auto bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <TrendingUpDown size={14} className="mr-1" />
+            Prediction
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleHealthCheck}
+            className="text-xs px-2 py-1 h-auto bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <Activity size={14} className="mr-1" />
+            Health
           </Button>
         </div>
 

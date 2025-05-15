@@ -109,20 +109,14 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center gap-2">
             <SquareChartGantt className="h-5 w-5" />
-            Machine Simulation
+            Prediction for Machine
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form
             id="simulation-form"
-            // onSubmit={form.handleSubmit(onValidSubmit, onInvalidSubmit)}
-            onSubmit={(e) => {
-              e.preventDefault();
-              onSubmit(selectedMachine);
-            }
-            }
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            onSubmit={form.handleSubmit(onValidSubmit, onInvalidSubmit)}
           >
             {/* MACHINE SELECT */}
             <FormField
@@ -135,7 +129,7 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      handleChangeMachine(value); // make sure to still call your original handler
+                      handleChangeMachine(value);
                     }}
                     value={field.value}
                   >
@@ -166,150 +160,12 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
               )}
             />
 
-            {/* AIR TO FUEL RATIO */}
-            <FormField
-              control={form.control}
-              name="airToFuelRatio"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>Air to Fuel Ratio</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="airToFuelRatio"
-                      type="number"
-                      step="0.1"
-                      value={selectedMachine?.afr}
-                      onChange={handleChange("afr")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* CURRENT */}
-            <FormField
-              control={form.control}
-              name="current"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>Current (Amperes)</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="current"
-                      type="number"
-                      step="0.1"
-                      value={selectedMachine?.current}
-                      onChange={handleChange("current")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* PRESSURE */}
-            <FormField
-              control={form.control}
-              name="pressure"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>Pressure (Pa)</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="pressure"
-                      type="number"
-                      value={selectedMachine?.pressure}
-                      onChange={handleChange("pressure")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* RPM */}
-            <FormField
-              control={form.control}
-              name="rpm"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>RPM</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="rpm"
-                      type="number"
-                      value={selectedMachine?.rpm}
-                      onChange={handleChange("rpm")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* TEMPERATURE */}
-            <FormField
-              control={form.control}
-              name="temperature"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>Temperature (°C)</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="temperature"
-                      type="number"
-                      step="0.1"
-                      value={selectedMachine?.temperature}
-                      onChange={handleChange("temperature")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* VIBRATION AMPLITUDE */}
-            <FormField
-              control={form.control}
-              name="vibrationAmplitude"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>Vibrations Max</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="vibrationAmplitude"
-                      type="number"
-                      step="0.01"
-                      value={selectedMachine?.vibration_max}
-                      onChange={handleChange("vibration_max")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            {/* DURATION */}
-            <FormField
-              control={form.control}
-              name="duration"
-              render={() => (
-                <FormItem className="col-span-1">
-                  <FormLabel>Duration</FormLabel>
-                  <FormControl>
-                    <Input
-                      name="duration"
-                      type="number"
-                      step="0.5"
-                      value={selectedMachine?.duration ?? 24}
-                      onChange={handleChange("duration")}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
             {/* BUTTONS - full width row */}
             <div className="col-span-full flex gap-2 justify-end mt-2">
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button type="submit">Send Simulation</Button>
+              <Button type="submit">Predict</Button>
             </div>
           </form>
         </Form>

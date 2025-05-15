@@ -1,14 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Settings } from "lucide-react";
+import { Send, Settings, Activity, TrendingUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import apiService from "@/services/apiService";
 import { MachineDefaults } from "@/types";
 import SimulationFormModal from "./SimulationFormModal";
+import PredictionFormModal from "./PredictionFormModal";
+import { da } from "date-fns/locale";
 
 interface ChatMessage {
   id: string;
-  content: string;
+  content:
+    | string
+    | {
+        type: "health_check";
+        data: any;
+      };
   sender: "user" | "system";
   timestamp: Date;
   animationComplete?: boolean;
@@ -28,6 +35,7 @@ export const ChatPage = () => {
   const [selectedMachine, setSelectedMachine] = useState<MachineDefaults>();
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isSimulationModalOpen, setSimulationModalOpen] = useState(false);
+  const [isPredictionModalOpen, setPredictionModalOpen] = useState(false);
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -127,14 +135,15 @@ export const ChatPage = () => {
 
   const handleSimulationSubmit = async (data: any) => {
     setSimulationModalOpen(false);
+    console.log(data);
     const formattedData = `Simulation Data:
-        Machine: ${data.machine}
-        Air to Fuel Ratio: ${data.airToFuelRatio} 
+        Machine: ${data.machine_id}
+        Air to Fuel Ratio: ${data.afr} 
         Current: ${data.current} Amperes 
         Pressure: ${data.pressure} Pa 
         RPM: ${data.rpm} 
         Temperature: ${data.temperature}°C 
-        Vibrations: ${data.vibrationAmplitude} 
+        Vibrations: ${data.vibration_max} 
         Duration: ${data.duration}
       `;
 
@@ -170,7 +179,7 @@ export const ChatPage = () => {
         simulation_data: selectedMachine,
       });
 
-      console.log(response);
+      // console.log(response);
     } catch (e) {
       console.log(e.message);
     }
@@ -223,6 +232,130 @@ export const ChatPage = () => {
     }, 1000);
   };
 
+  const handlePredictionSubmit = async (data: any) => {
+    setPredictionModalOpen(false);
+
+    const newMessage = {
+      id: `user-${Date.now()}`,
+      content: "Prediction for " + data.machine,
+      className: "whitespace-pre-line",
+      sender: "user" as const,
+      timestamp: new Date(),
+      animationComplete: false,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setShowSimulation(false);
+
+    setTimeout(() => {
+      setIsSendingMessage(true);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === newMessage.id ? { ...msg, animationComplete: true } : msg
+        )
+      );
+    }, 300);
+
+    console.log(data);
+
+    let response;
+
+    try {
+      response = await apiService.postChatPrompt({
+        message: "__predict_failure",
+        machine_id: selectedMachine.machine_id,
+      });
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+
+    setTimeout(() => {
+      setTimeout(() => {
+        const predictionResponseMessage = {
+          id: `system-${Date.now()}`,
+          content: response,
+          sender: "system" as const,
+          timestamp: new Date(),
+          animationComplete: false,
+        };
+        setMessages((prev) => [...prev, predictionResponseMessage]);
+
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === predictionResponseMessage.id
+                ? { ...msg, animationComplete: true }
+                : msg
+            )
+          );
+        }, 300);
+        setIsSendingMessage(false);
+      }, 5000);
+    }, 1000);
+  };
+
+  const handleHealthCheck = async () => {
+    const newMessage = {
+      id: `user-${Date.now()}`,
+      content: "Conduct a system health check.",
+      className: "whitespace-pre-line",
+      sender: "user" as const,
+      timestamp: new Date(),
+      animationComplete: false,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setShowSimulation(false);
+
+    setTimeout(() => {
+      setIsSendingMessage(true);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === newMessage.id ? { ...msg, animationComplete: true } : msg
+        )
+      );
+    }, 300);
+
+    let response;
+
+    try {
+      response = await apiService.postChatPrompt({
+        message: "__system_health",
+      });
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+
+    setTimeout(() => {
+      setTimeout(() => {
+        const healthResponseMessage = {
+          id: `system-${Date.now()}`,
+          content: {
+            type: "health_check" as const,
+            data: response,
+          },
+          sender: "system" as const,
+          timestamp: new Date(),
+          animationComplete: false,
+        };
+        setMessages((prev) => [...prev, healthResponseMessage]);
+
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === healthResponseMessage.id
+                ? { ...msg, animationComplete: true }
+                : msg
+            )
+          );
+        }, 300);
+        setIsSendingMessage(false);
+      }, 5000);
+    }, 1000);
+  };
+
   return (
     <div className="w-[1000px] h-[600px] mx-32 flex flex-col">
       {/* HEADER */}
@@ -252,7 +385,84 @@ export const ChatPage = () => {
               message.animationComplete && "opacity-100 translate-y-0"
             )}
           >
-            <p className="text-sm">{message.content}</p>
+            {typeof message.content === "object" &&
+            message.content.type === "health_check" ? (
+              <div className="text-sm">
+                <table className="table-auto border-collapse border border-gray-300 text-left text-sm w-full">
+                  <thead>
+                    <tr>
+                      <th
+                        className="border border-gray-300 px-2 py-1 bg-gray-50"
+                        colSpan={2}
+                      >
+                        Agents
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-gray-300 px-2 py-1">
+                        Data Agent
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {message.content.data.agents.data_agent}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 px-2 py-1">
+                        Prediction Agent
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {message.content.data.agents.prediction_agent}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 px-2 py-1">
+                        Simulation Agent
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {message.content.data.agents.simulation_agent}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th
+                        className="border border-gray-300 px-2 py-1 bg-gray-50"
+                        colSpan={2}
+                      >
+                        System Info
+                      </th>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 px-2 py-1">
+                        Status
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {message.content.data.status}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 px-2 py-1">
+                        Timestamp
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {message.content.data.timestamp}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="border border-gray-300 px-2 py-1">
+                        Version
+                      </td>
+                      <td className="border border-gray-300 px-2 py-1">
+                        {message.content.data.version}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : typeof message.content === "string" ? (
+              <p className="text-sm whitespace-pre-line">{message.content}</p>
+            ) : null}
+
             <p className="text-xs opacity-70 mt-1">
               {message.timestamp.toLocaleTimeString([], {
                 hour: "2-digit",
@@ -275,8 +485,8 @@ export const ChatPage = () => {
 
       {/* INPUT AREA (BOTTOM SECTION) */}
       <div className="p-3">
-        {/* Simulation Button */}
-        <div className="flex justify-between items-center mb-2">
+        {/* Buttonsss */}
+        <div className="flex gap-4 items-center mb-2">
           <Button
             variant="outline"
             size="sm"
@@ -285,6 +495,24 @@ export const ChatPage = () => {
           >
             <Settings size={14} className="mr-1" />
             Simulation
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPredictionModalOpen(true)}
+            className="text-xs px-2 py-1 h-auto bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <TrendingUpDown size={14} className="mr-1" />
+            Prediction
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleHealthCheck}
+            className="text-xs px-2 py-1 h-auto bg-muted hover:bg-muted/80 transition-colors"
+          >
+            <Activity size={14} className="mr-1" />
+            Health
           </Button>
         </div>
 
@@ -315,6 +543,14 @@ export const ChatPage = () => {
         setSelectedMachine={setSelectedMachine}
         onSubmit={handleSimulationSubmit}
         onCancel={() => setSimulationModalOpen(false)}
+      />
+      <PredictionFormModal
+        isOpen={isPredictionModalOpen}
+        onClose={() => setPredictionModalOpen(false)}
+        selectedMachine={selectedMachine}
+        setSelectedMachine={setSelectedMachine}
+        onSubmit={handlePredictionSubmit}
+        onCancel={() => setPredictionModalOpen(false)}
       />
     </div>
   );

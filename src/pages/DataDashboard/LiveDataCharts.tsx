@@ -35,9 +35,16 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
   useEffect(() => {
     if (!machineId) return;
 
-    apiService
-      .getSensorDataForMachine(machineId)
-      .then((data) => setMetrics(data as LiveData[]));
+    const fetchData = () => {
+      apiService
+        .getSensorDataForMachine(machineId)
+        .then((data) => setMetrics(data as LiveData[]));
+    };
+
+    fetchData();
+    const intervalId = setInterval(fetchData, 12000);
+
+    return () => clearInterval(intervalId);
   }, [machineId]);
 
   const sortedData = [...metrics].sort(
@@ -80,12 +87,19 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
     value: entry.vibration,
   }));
 
-  console.log(AFRData);
-  console.log(currentData);
-  console.log(pressureData);
-  console.log(RPMtData);
-  console.log(temperatureData);
-  console.log(vibrarionData);
+  const getYAxisDomain = (data) => {
+    if (!data || data.length === 0) return [0, 10];
+
+    const values = data.map((d) => d.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    // Round to nearest 5 or 10 for nice axis ticks
+    const roundedMin = Math.floor(min / 5) * 5;
+    const roundedMax = Math.ceil(max / 5) * 5;
+
+    return [roundedMin, roundedMax]; // clean values without decimals
+  };
 
   return (
     <div className="space-y-6">
@@ -129,7 +143,11 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="rgba(255,255,255,0.1)"
                       />
                       <XAxis dataKey="time" stroke="#888" />
-                      <YAxis domain={[15, 35]} stroke="#888" />
+                      <YAxis
+                        stroke="#888"
+                        domain={getYAxisDomain(AFRData)}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -192,7 +210,11 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="rgba(255,255,255,0.1)"
                       />
                       <XAxis dataKey="time" stroke="#888" />
-                      <YAxis domain={[15, 35]} stroke="#888" />
+                      <YAxis
+                        stroke="#888"
+                        domain={getYAxisDomain(currentData)}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -255,7 +277,11 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="rgba(255,255,255,0.1)"
                       />
                       <XAxis dataKey="time" stroke="#888" />
-                      <YAxis domain={[15, 35]} stroke="#888" />
+                      <YAxis
+                        stroke="#888"
+                        domain={getYAxisDomain(pressureData)}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -312,7 +338,11 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="rgba(255,255,255,0.1)"
                       />
                       <XAxis dataKey="time" stroke="#888" />
-                      <YAxis domain={[15, 35]} stroke="#888" />
+                      <YAxis
+                        stroke="#888"
+                        domain={getYAxisDomain(RPMtData)}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -375,7 +405,11 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="rgba(255,255,255,0.1)"
                       />
                       <XAxis dataKey="time" stroke="#888" />
-                      <YAxis domain={[15, 35]} stroke="#888" />
+                      <YAxis
+                        stroke="#888"
+                        domain={getYAxisDomain(temperatureData)}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -438,7 +472,11 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="rgba(255,255,255,0.1)"
                       />
                       <XAxis dataKey="time" stroke="#888" />
-                      <YAxis domain={[15, 35]} stroke="#888" />
+                      <YAxis
+                        stroke="#888"
+                        domain={getYAxisDomain(vibrarionData)}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(0, 0, 0, 0.8)",

@@ -30,7 +30,7 @@ export default {
     return request("POST", `/files/deploy-model`);
   },
   getSensorDataForMachine(machineId) {
-    return request("GET", `/live-data/sensor-data/${machineId}`);
+    return request("GET", `/api/live_data?machine_id=${machineId}`);
   },
   getFailuresForMachine(machineId) {
     return request("GET", `/live-data/failures/${machineId}`);

@@ -59,13 +59,11 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [projectName, setProjectName] = useState("");
-  const { addProject } = useProjects();
-  const navigate = useNavigate();
   const form = useForm<SimulationData>({});
 
   const [machines, setMachines] = useState<Machine[]>([]);
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
+  const [duration, setDuration] = useState<number>(24);
 
   useEffect(() => {
     apiService.getMachineList().then(setMachines);
@@ -90,13 +88,12 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
     };
 
   const onValidSubmit = (data) => {
-    onSubmit(data); // same logic you have, but only if valid!
+    onSubmit(data); 
   };
 
   const onInvalidSubmit = (errors) => {
-    console.log("Form has errors:", errors); // Optional: debug
-    // No need to manually block anything — it won’t call onValidSubmit if invalid
-  };
+    console.log("Form has errors:", errors);
+  };  
 
   return (
     <Dialog
@@ -116,10 +113,10 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
         <Form {...form}>
           <form
             id="simulation-form"
-            // onSubmit={form.handleSubmit(onValidSubmit, onInvalidSubmit)}
             onSubmit={(e) => {
               e.preventDefault();
-              onSubmit(selectedMachine);
+              
+              onSubmit({...selectedMachine, duration });
             }
             }
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -296,8 +293,8 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
                       name="duration"
                       type="number"
                       step="0.5"
-                      value={selectedMachine?.duration ?? 24}
-                      onChange={handleChange("duration")}
+                      value={duration}
+                      onChange={(e) => setDuration(Number(e.target.value))}
                     />
                   </FormControl>
                 </FormItem>

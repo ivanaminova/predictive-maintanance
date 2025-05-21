@@ -42,7 +42,7 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 12000);
+    const intervalId = setInterval(fetchData, 10000);
 
     return () => clearInterval(intervalId);
   }, [machineId]);
@@ -50,6 +50,8 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
   const sortedData = [...metrics].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
+
+  console.log(metrics)
 
   const formatTime = (timestamp: string) =>
     new Date(timestamp).toLocaleTimeString([], {
@@ -86,6 +88,8 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
     time: formatTime(entry.timestamp),
     value: entry.vibration,
   }));
+
+  console.log(vibrarionData)
 
   const getYAxisDomain = (data) => {
     if (!data || data.length === 0) return [0, 10];
@@ -147,6 +151,12 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="#888"
                         domain={getYAxisDomain(AFRData)}
                         allowDecimals={false}
+                        label={{
+                          value: "Lambda (λ)",
+                          angle: -90,
+                          position: "center",
+                          style: { fill: "#888" },
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -214,6 +224,12 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="#888"
                         domain={getYAxisDomain(currentData)}
                         allowDecimals={false}
+                        label={{
+                          value: "Amperes (A)",
+                          angle: -90,
+                          position: "center",
+                          style: { fill: "#888" }, // label text color
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -281,6 +297,12 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="#888"
                         domain={getYAxisDomain(pressureData)}
                         allowDecimals={false}
+                        label={{
+                          value: "Pascals (Pa)",
+                          angle: -90,
+                          position: "center",
+                          style: { fill: "#888" }, // label text color
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -342,6 +364,13 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="#888"
                         domain={getYAxisDomain(RPMtData)}
                         allowDecimals={false}
+                        label={{
+                          value: "RPM",
+                          angle: -90,
+                          position: "outsideLeft",
+                          offset: 100,
+                          style: { fill: "#888" }, // label text color
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -409,6 +438,12 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="#888"
                         domain={getYAxisDomain(temperatureData)}
                         allowDecimals={false}
+                        label={{
+                          value: "Celsius (C°)",
+                          angle: -90,
+                          position: "center",
+                          style: { fill: "#888" }, // label text color
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -476,6 +511,12 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
                         stroke="#888"
                         domain={getYAxisDomain(vibrarionData)}
                         allowDecimals={false}
+                        label={{
+                          value: "Hertz (Hz)",
+                          angle: -90,
+                          position: "center",
+                          style: { fill: "#888" }, // label text color
+                        }}
                       />
                       <Tooltip
                         contentStyle={{

@@ -6,7 +6,6 @@ import apiService from "@/services/apiService";
 import { MachineDefaults } from "@/types";
 import SimulationFormModal from "./SimulationFormModal";
 import PredictionFormModal from "./PredictionFormModal";
-import { da } from "date-fns/locale";
 
 interface ChatMessage {
   id: string;
@@ -14,6 +13,14 @@ interface ChatMessage {
     | string
     | {
         type: "health_check";
+        data: any;
+      }
+    | {
+        type: "prediction_check";
+        data: any;
+      }
+    | {
+        type: "simulation_check";
         data: any;
       };
   sender: "user" | "system";
@@ -133,9 +140,34 @@ export const ChatPage = () => {
     }
   };
 
+  const constructSimulationDataObject = async (changedData) => {
+    const originalData = await apiService.getMachineDefaults(
+      changedData.machine_id
+    );
+
+    let newParams = {};
+
+    for (const prop in changedData) {
+      if (changedData.hasOwnProperty(prop)) {
+        if (prop === "duration") {
+          continue;
+        }
+        if (changedData[prop] !== originalData[prop]) {
+          newParams[prop] = changedData[prop];
+        }
+      }
+    }
+
+    return {
+      machine_id: originalData.machine_id,
+      initial_values: originalData,
+      fixed_parameters: newParams,
+      duration_hours: changedData.duration,
+    };
+  };
+
   const handleSimulationSubmit = async (data: any) => {
     setSimulationModalOpen(false);
-    console.log(data);
     const formattedData = `Simulation Data:
         Machine: ${data.machine_id}
         Air to Fuel Ratio: ${data.afr} 
@@ -169,17 +201,16 @@ export const ChatPage = () => {
       );
     }, 300);
 
-    // this is the response TODO:TODO:TODO:
+    const simulationData = await constructSimulationDataObject(data);
+    console.log(simulationData)
     let response;
 
     try {
       response = await apiService.postChatPrompt({
         message: "__simulation_run",
         machine_id: selectedMachine.machine_id,
-        simulation_data: selectedMachine,
+        simulation_data: simulationData,
       });
-
-      // console.log(response);
     } catch (e) {
       console.log(e.message);
     }
@@ -206,12 +237,13 @@ export const ChatPage = () => {
         );
       }, 300);
 
-      //FIXME: second response
       setTimeout(() => {
         const simulationResponseMessage = {
           id: `system-${Date.now()}`,
-          content:
-            "This is the simulation response. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          content: {
+            type: "simulation_check" as const,
+            data: response,
+          },
           sender: "system" as const,
           timestamp: new Date(),
           animationComplete: false,
@@ -256,8 +288,6 @@ export const ChatPage = () => {
       );
     }, 300);
 
-    console.log(data);
-
     let response;
 
     try {
@@ -265,7 +295,6 @@ export const ChatPage = () => {
         message: "__predict_failure",
         machine_id: selectedMachine.machine_id,
       });
-      console.log(response);
     } catch (e) {
       console.log(e);
     }
@@ -274,7 +303,10 @@ export const ChatPage = () => {
       setTimeout(() => {
         const predictionResponseMessage = {
           id: `system-${Date.now()}`,
-          content: response,
+          content: {
+            type: "prediction_check" as const,
+            data: response,
+          },
           sender: "system" as const,
           timestamp: new Date(),
           animationComplete: false,
@@ -323,7 +355,6 @@ export const ChatPage = () => {
       response = await apiService.postChatPrompt({
         message: "__system_health",
       });
-      console.log(response);
     } catch (e) {
       console.log(e);
     }
@@ -356,6 +387,187 @@ export const ChatPage = () => {
     }, 1000);
   };
 
+  const determineSystemResponse = (message) => {
+    const formatAction = (action) => {
+      return action
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
+    const capitalize = (str) =>
+      typeof str === "string"
+        ? str.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase())
+        : str;
+
+    if (typeof message.content === "object") {
+      if (message.content.type === "health_check") {
+        return (
+          <div className="text-sm">
+            <table className="table-auto border-collapse border border-gray-300 text-left text-sm w-full">
+              <thead>
+                <tr>
+                  <th
+                    className="border border-gray-300 px-2 py-1 bg-secondary"
+                    colSpan={2}
+                  >
+                    Agents
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-2 py-1">
+                    Data Agent
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {capitalize(message.content.data.agents.data_agent)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-2 py-1">
+                    Prediction Agent
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {capitalize(message.content.data.agents.prediction_agent)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-2 py-1">
+                    Simulation Agent
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {capitalize(message.content.data.agents.simulation_agent)}
+                  </td>
+                </tr>
+                <tr>
+                  <th
+                    className="border border-gray-300 px-2 py-1 bg-secondary"
+                    colSpan={2}
+                  >
+                    System Info
+                  </th>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-2 py-1">Status</td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {capitalize(message.content.data.status)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-2 py-1">
+                    Timestamp
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {message.content.data.timestamp}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-2 py-1">Version</td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {message.content.data.version}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+      } else if (message.content.type === "prediction_check") {
+        const response = message.content.data;
+        const predictions = response.failure_predictions;
+        if (!predictions || predictions.length === 0) {
+          return (
+            <div className="text-sm">
+              Machine {response.machine_id} is healthy. No failures incoming.
+            </div>
+          );
+        }
+        return (
+          <div className="text-sm space-y-2">
+            <p>
+              Failure probability for <strong>{response.machine_id}</strong>:{" "}
+              <strong>
+                {(response.failure_probability * 100).toFixed(2)}%
+              </strong>
+              .
+            </p>
+            <table className="table-auto border-collapse border border-gray-300 text-left text-sm w-full">
+              <thead>
+                <tr className="bg-secondary">
+                  <th className="border border-gray-300 px-2 py-1">
+                    Failure Type
+                  </th>
+                  <th className="border border-gray-300 px-2 py-1">
+                    Failure Probability
+                  </th>
+                  <th className="border border-gray-300 px-2 py-1">
+                    Recommended Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {predictions.map((pred, idx) => (
+                  <tr key={idx}>
+                    <td className="border border-gray-300 px-2 py-1">
+                      {pred.failure_type}
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      {(pred.detection.probability * 100).toFixed(2)}%
+                    </td>
+                    <td className="border border-gray-300 px-2 py-1">
+                      {capitalize(pred.action_recommendation.action)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      } else if (message.content.type === "simulation_check") {
+        const prediction = message.content.data.prediction;
+        const machineId = message.content.data.machine_id;
+        const failureProbability = (
+          prediction.failure_probability * 100
+        ).toFixed(2);
+
+        const recommendedAction = formatAction(prediction.recommended_action);
+
+        const mostProbable = prediction.failure_predictions.reduce(
+          (max, curr) =>
+            curr.detection.probability > max.detection.probability ? curr : max
+        );
+
+        const failureType =
+          mostProbable.failure_type === "Normal"
+            ? "Unknown"
+            : mostProbable.failure_type;
+
+        const failurePercentage = (
+          mostProbable.detection.probability * 100
+        ).toFixed(2);
+
+        return (
+          <div className="text-sm space-y-1">
+            <p>
+              <strong>Failure probability for {machineId}:</strong>{" "}
+              {failureProbability}%
+            </p>
+            <p>
+              <strong>Recommended action:</strong> {recommendedAction}
+            </p>
+            <p>
+              <strong>Most probable failure type:</strong> {failureType}
+              {failureType !== "Unknown" && ` (${failurePercentage}%)`}
+            </p>
+          </div>
+        );
+      }
+    } else if (typeof message.content === "string") {
+      return <p className="text-sm whitespace-pre-line">{message.content}</p>;
+    } else {
+      return <></>;
+    }
+  };
+
   return (
     <div className="w-[1000px] h-[600px] mx-32 flex flex-col">
       {/* HEADER */}
@@ -385,84 +597,7 @@ export const ChatPage = () => {
               message.animationComplete && "opacity-100 translate-y-0"
             )}
           >
-            {typeof message.content === "object" &&
-            message.content.type === "health_check" ? (
-              <div className="text-sm">
-                <table className="table-auto border-collapse border border-gray-300 text-left text-sm w-full">
-                  <thead>
-                    <tr>
-                      <th
-                        className="border border-gray-300 px-2 py-1 bg-gray-50"
-                        colSpan={2}
-                      >
-                        Agents
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1">
-                        Data Agent
-                      </td>
-                      <td className="border border-gray-300 px-2 py-1">
-                        {message.content.data.agents.data_agent}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1">
-                        Prediction Agent
-                      </td>
-                      <td className="border border-gray-300 px-2 py-1">
-                        {message.content.data.agents.prediction_agent}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1">
-                        Simulation Agent
-                      </td>
-                      <td className="border border-gray-300 px-2 py-1">
-                        {message.content.data.agents.simulation_agent}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th
-                        className="border border-gray-300 px-2 py-1 bg-gray-50"
-                        colSpan={2}
-                      >
-                        System Info
-                      </th>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1">
-                        Status
-                      </td>
-                      <td className="border border-gray-300 px-2 py-1">
-                        {message.content.data.status}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1">
-                        Timestamp
-                      </td>
-                      <td className="border border-gray-300 px-2 py-1">
-                        {message.content.data.timestamp}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="border border-gray-300 px-2 py-1">
-                        Version
-                      </td>
-                      <td className="border border-gray-300 px-2 py-1">
-                        {message.content.data.version}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            ) : typeof message.content === "string" ? (
-              <p className="text-sm whitespace-pre-line">{message.content}</p>
-            ) : null}
-
+            {determineSystemResponse(message)}
             <p className="text-xs opacity-70 mt-1">
               {message.timestamp.toLocaleTimeString([], {
                 hour: "2-digit",

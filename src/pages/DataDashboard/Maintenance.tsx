@@ -32,7 +32,7 @@ const Maintenance: React.FC<MaintenanceProps> = ({ machineId }) => {
         </p>
       ) : (
         <div className="space-y-6">
-          <h3 className="text-lg font-medium">Scheduled & Past Maintenance</h3>
+          <h3 className="text-lg font-medium">Scheduled & Past Maintenances</h3>
 
           <div className="space-y-4">
             {maintenances.map((m) => (

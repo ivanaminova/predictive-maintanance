@@ -7,11 +7,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import apiService from "@/services/apiService";
 
 interface LiveDataChartsProps {
@@ -51,8 +49,6 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
-  console.log(metrics)
-
   const formatTime = (timestamp: string) =>
     new Date(timestamp).toLocaleTimeString([], {
       hour: "2-digit",
@@ -88,9 +84,7 @@ const LiveDataCharts: React.FC<LiveDataChartsProps> = ({ machineId }) => {
     time: formatTime(entry.timestamp),
     value: entry.vibration,
   }));
-
-  console.log(vibrarionData)
-
+  
   const getYAxisDomain = (data) => {
     if (!data || data.length === 0) return [0, 10];
 

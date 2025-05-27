@@ -28,13 +28,12 @@ interface SimulationFormProps {
 
 interface SimulationData {
   machine: string;
-  airToFuelRatio: number;
+  afr: number;
   current: number;
   pressure: number;
   rpm: number;
   temperature: number;
-  vibrationAmplitude: number;
-  vibrationFrequency: number;
+  vibration_max: number;
   duration: number;
 }
 
@@ -48,6 +47,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
   const [machines, setMachines] = useState<Machine[]>([]);
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
+  const [duration, setDuration] = useState<number>(24);
 
   useEffect(() => {
     apiService.getMachineList().then(setMachines);
@@ -58,14 +58,6 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
     apiService.getMachineDefaults(selectedMachineId).then(setSelectedMachine);
   }, [selectedMachineId]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const form = document.getElementById("simulation-form") as HTMLFormElement;
-    const data = Object.fromEntries(new FormData(form));
-
-    onSubmit(data);
-  };
 
   const handleChangeMachine = (id: string) => {
     setSelectedMachineId(id);
@@ -81,7 +73,15 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
   return (
     <Form {...form}>
-      <form id="simulation-form" onSubmit={handleSubmit} className="space-y-4">
+      <form
+        id="simulation-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+
+          onSubmit({ ...selectedMachine, duration });
+        }}
+        className="space-y-4"
+      >
         <h3 className="text-lg font-medium mb-2">Machine Simulation</h3>
 
         <FormField
@@ -114,13 +114,13 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
         <FormField
           control={form.control}
-          name="airToFuelRatio"
+          name="afr"
           render={() => (
             <FormItem>
               <FormLabel>Air to Fuel Ratio</FormLabel>
               <FormControl>
                 <Input
-                  name="airToFuelRatio"
+                  name="afr"
                   type="number"
                   step="0.1"
                   value={selectedMachine?.afr}
@@ -207,13 +207,13 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
 
         <FormField
           control={form.control}
-          name="vibrationAmplitude"
+          name="vibration_max"
           render={() => (
             <FormItem>
               <FormLabel>Vibrations Max</FormLabel>
               <FormControl>
                 <Input
-                  name="vibrationAmplitude"
+                  name="vibration_max"
                   type="number"
                   step="0.01"
                   value={selectedMachine?.vibration_max}

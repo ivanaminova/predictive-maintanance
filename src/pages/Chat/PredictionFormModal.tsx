@@ -7,10 +7,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useProjects } from "@/context/ProjectContext";
-import { PlusCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -90,12 +88,11 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
     };
 
   const onValidSubmit = (data) => {
-    onSubmit(data); // same logic you have, but only if valid!
+    onSubmit(data);
   };
 
   const onInvalidSubmit = (errors) => {
-    console.log("Form has errors:", errors); // Optional: debug
-    // No need to manually block anything — it won’t call onValidSubmit if invalid
+    console.log("Form has errors:", errors);
   };
 
   return (

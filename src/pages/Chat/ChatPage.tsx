@@ -7,6 +7,7 @@ import { MachineDefaults } from "@/types";
 import SimulationFormModal from "./SimulationFormModal";
 import PredictionFormModal from "./PredictionFormModal";
 
+
 interface ChatMessage {
   id: string;
   content:
@@ -83,7 +84,6 @@ export const ChatPage = () => {
     setMessages((prev) => [...prev, newUserMessage]);
     setInputValue("");
 
-    // Mark message as animation complete after animation duration
     setTimeout(() => {
       setTimeout(() => setIsSendingMessage(true), 700);
       setMessages((prev) =>
@@ -202,7 +202,6 @@ export const ChatPage = () => {
     }, 300);
 
     const simulationData = await constructSimulationDataObject(data);
-    console.log(simulationData)
     let response;
 
     try {
@@ -393,7 +392,7 @@ export const ChatPage = () => {
         .split("_")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
-    }
+    };
     const capitalize = (str) =>
       typeof str === "string"
         ? str.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase())
@@ -483,13 +482,6 @@ export const ChatPage = () => {
         }
         return (
           <div className="text-sm space-y-2">
-            <p>
-              Failure probability for <strong>{response.machine_id}</strong>:{" "}
-              <strong>
-                {(response.failure_probability * 100).toFixed(2)}%
-              </strong>
-              .
-            </p>
             <table className="table-auto border-collapse border border-gray-300 text-left text-sm w-full">
               <thead>
                 <tr className="bg-secondary">

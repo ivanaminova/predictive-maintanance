@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useProjects } from "@/context/ProjectContext";
-import { PlusCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,14 +83,6 @@ const SimulationFormModal: React.FC<CreateProjectModalProps> = ({
         [name]: e.target.value,
       }));
     };
-
-  const onValidSubmit = (data) => {
-    onSubmit(data); 
-  };
-
-  const onInvalidSubmit = (errors) => {
-    console.log("Form has errors:", errors);
-  };  
 
   return (
     <Dialog

@@ -133,7 +133,6 @@ const ProjectDetails = () => {
         (file) => file.name.toLowerCase() === requiredFilename.toLowerCase()
       );
       if (matchingFile) {
-        console.log(matchingFile);
         formDataFiles.append(key, matchingFile);
       }
     });
@@ -144,7 +143,6 @@ const ProjectDetails = () => {
 
     try {
       const res = await apiService.uploadFiles(formDataFiles);
-      console.log(res);
       setUploadCompleted(true);
       setFilesDropped(false);
       setUploadInitiated(false);
@@ -163,14 +161,12 @@ const ProjectDetails = () => {
   function showAppropriateUploadBoxMessage() {
     if (uploadCompleted) {
       if (errorMessage !== "") {
-        console.log("showing for: upload failed");
         return (
           <p className="text-sm font-medium text-[#fc6161] mb-2">
             {errorMessage}
           </p>
         );
       } else {
-        console.log("showing for: upload successful");
         return (
           <p className="text-sm font-medium text-[#17eba0] mb-2">
             {selectedFiles.length} file
@@ -180,19 +176,14 @@ const ProjectDetails = () => {
       }
     }
     if (!filesDropped) {
-      console.log("showing for: no files dropped (start position)");
       return <p className="text-muted-foreground text-sm">Drop file here or</p>;
     } else if (filesDropped && !uploadInitiated && errorMessage) {
-      console.log(
-        "showing for: files dropped upload clicked but didnt pass validation"
-      );
       return (
         <p className="text-sm font-medium text-[#fc6161] mb-2">
           {errorMessage}
         </p>
       );
     } else if (filesDropped && !uploadInitiated) {
-      console.log("showing for: files dropped upload btn not clicked");
       return (
         <p className="text-sm font-medium text-foreground mb-2">
           {selectedFiles.length} file
@@ -200,7 +191,6 @@ const ProjectDetails = () => {
         </p>
       );
     } else if (uploadInitiated && isUploading && !uploadCompleted) {
-      console.log("showing for: files dropped clicked upload still uploading");
       return (
         <div>
           <Loader size="sm" className="mb-2" />
@@ -303,8 +293,6 @@ const ProjectDetails = () => {
       if (entries.length > 0) {
         const [key, value] = entries[0];
 
-        console.log(trainRes);
-
         if (value === "--- Stage 2 Finished ---") {
           clearInterval(progressIntervalRef.current);
           progressIntervalRef.current = null;
@@ -334,7 +322,6 @@ const ProjectDetails = () => {
     try {
       setIsDeploying(true);
       const res = await apiService.deployModel();
-      console.log(res);
       setDeployingFinished("Deployment successful.");
     } catch (err) {
       console.log(err.message);
@@ -343,8 +330,6 @@ const ProjectDetails = () => {
       setIsDeploying(false);
       setPhaseDeploy(false);
     }
-    // Your deploy logic goes here
-    console.log("Deploying model...");
   };
 
   return (

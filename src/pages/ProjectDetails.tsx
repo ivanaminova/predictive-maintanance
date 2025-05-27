@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, Cpu } from "lucide-react";
+import { ArrowLeft, Upload, Cpu, CheckCheck, Ban } from "lucide-react";
 import { useProjects } from "@/context/ProjectContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import apiService from "../services/apiService";
 import { Loader } from "rsuite";
-import { fi, is } from "date-fns/locale";
+import toast, { Toaster } from "react-hot-toast";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -118,9 +118,7 @@ const ProjectDetails = () => {
     const { isValid, missingFiles } = validateSelectedFiles(selectedFiles);
 
     if (!isValid) {
-      setErrorMessage(
-        `Upload failed. Missing required files:\n${missingFiles.join("\n")}`
-      );
+      setErrorMessage(`Missing required files:\n${missingFiles.join("\n")}`);
       setUploadInitiated(false);
       return;
     }
@@ -148,6 +146,20 @@ const ProjectDetails = () => {
       setUploadInitiated(false);
       setIsUploading(false);
       setPhaseUpload(false);
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-72 bg-primary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start gap-2 text-muted">
+              <CheckCheck />
+              <p className="text-sm font-medium">Upload successful.</p>
+            </div>
+          </div>
+        </div>
+      ));
     } catch (error) {
       console.error("File upload failed:", error);
       setUploadCompleted(true);
@@ -155,6 +167,20 @@ const ProjectDetails = () => {
       setFilesDropped(false);
       setUploadInitiated(false);
       setIsUploading(false);
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-72 bg-destructive shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start gap-2 text-muted">
+              <Ban />
+              <p className="text-sm font-medium">Upload unsuccessful.</p>
+            </div>
+          </div>
+        </div>
+      ));
     }
   };
 
@@ -168,7 +194,7 @@ const ProjectDetails = () => {
         );
       } else {
         return (
-          <p className="text-sm font-medium text-[#17eba0] mb-2">
+          <p className="text-sm font-medium text-[#17eba0] mb-2 flex justify-center">
             {selectedFiles.length} file
             {selectedFiles.length > 1 ? "s" : ""} uploaded
           </p>
@@ -251,6 +277,20 @@ const ProjectDetails = () => {
 
     try {
       const trainPromise = apiService.trainModel(); // Starts the long-running process
+      toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } max-w-md w-72 bg-secondary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start gap-2">
+            <Loader />
+            <p className="text-sm font-medium">Training Model...</p>
+          </div>
+        </div>
+      </div>
+    ));
       try {
         const response = (await apiService.getProgress()) as {
           progress: number;
@@ -323,9 +363,37 @@ const ProjectDetails = () => {
       setIsDeploying(true);
       const res = await apiService.deployModel();
       setDeployingFinished("Deployment successful.");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-72 bg-primary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start gap-2 text-muted">
+              <CheckCheck />
+              <p className="text-sm font-medium">Model deployment is successful.</p>
+            </div>
+          </div>
+        </div>
+      ));
     } catch (err) {
       console.log(err.message);
       setDeployingFinished(err.message);
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } max-w-md w-72 bg-destructive shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start gap-2 text-muted">
+              <Ban />
+              <p className="text-sm font-medium">Model deployment was not successful: {err.message}</p>
+            </div>
+          </div>
+        </div>
+      ));
     } finally {
       setIsDeploying(false);
       setPhaseDeploy(false);
@@ -417,6 +485,7 @@ const ProjectDetails = () => {
           <CardFooter className="flex justify-end"></CardFooter>
         </Card>
       </div>
+      <Toaster position="top-right" reverseOrder={false} />
     </div>
   );
 };

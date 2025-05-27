@@ -149,7 +149,7 @@ const ProjectDetails = () => {
       toast.custom((t) => (
         <div
           className={`${
-            t.visible ? "animate-enter" : "animate-leave"
+            t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
           } max-w-md w-72 bg-primary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
         >
           <div className="flex-1 w-0 p-4">
@@ -161,7 +161,6 @@ const ProjectDetails = () => {
         </div>
       ));
     } catch (error) {
-      console.error("File upload failed:", error);
       setUploadCompleted(true);
       setErrorMessage("File upload failed. Please try again.");
       setFilesDropped(false);
@@ -170,13 +169,15 @@ const ProjectDetails = () => {
       toast.custom((t) => (
         <div
           className={`${
-            t.visible ? "animate-enter" : "animate-leave"
+            t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
           } max-w-md w-72 bg-destructive shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
         >
           <div className="flex-1 w-0 p-4">
             <div className="flex items-start gap-2 text-muted">
               <Ban />
-              <p className="text-sm font-medium">Upload unsuccessful.</p>
+              <p className="text-sm font-medium">
+                Upload unsuccessful: {error.message}
+              </p>
             </div>
           </div>
         </div>
@@ -278,19 +279,19 @@ const ProjectDetails = () => {
     try {
       const trainPromise = apiService.trainModel(); // Starts the long-running process
       toast.custom((t) => (
-      <div
-        className={`${
-          t.visible ? "animate-enter" : "animate-leave"
-        } max-w-md w-72 bg-secondary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-      >
-        <div className="flex-1 w-0 p-4">
-          <div className="flex items-start gap-2">
-            <Loader />
-            <p className="text-sm font-medium">Training Model...</p>
+        <div
+          className={`${
+            t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
+          } max-w-md w-72 bg-secondary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        >
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start gap-2">
+              <Loader />
+              <p className="text-sm font-medium">Training Model...</p>
+            </div>
           </div>
         </div>
-      </div>
-    ));
+      ));
       try {
         const response = (await apiService.getProgress()) as {
           progress: number;
@@ -359,6 +360,20 @@ const ProjectDetails = () => {
   };
 
   const handleDeployModel = async () => {
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
+        } max-w-md w-72 bg-secondary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start gap-2">
+            <Loader />
+            <p className="text-sm font-medium">Deploying Model...</p>
+          </div>
+        </div>
+      </div>
+    ));
     try {
       setIsDeploying(true);
       const res = await apiService.deployModel();
@@ -366,13 +381,15 @@ const ProjectDetails = () => {
       toast.custom((t) => (
         <div
           className={`${
-            t.visible ? "animate-enter" : "animate-leave"
+            t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
           } max-w-md w-72 bg-primary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
         >
           <div className="flex-1 w-0 p-4">
             <div className="flex items-start gap-2 text-muted">
               <CheckCheck />
-              <p className="text-sm font-medium">Model deployment is successful.</p>
+              <p className="text-sm font-medium">
+                Model deployment is successful.
+              </p>
             </div>
           </div>
         </div>
@@ -383,13 +400,15 @@ const ProjectDetails = () => {
       toast.custom((t) => (
         <div
           className={`${
-            t.visible ? "animate-enter" : "animate-leave"
+            t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
           } max-w-md w-72 bg-destructive shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
         >
           <div className="flex-1 w-0 p-4">
             <div className="flex items-start gap-2 text-muted">
               <Ban />
-              <p className="text-sm font-medium">Model deployment was not successful: {err.message}</p>
+              <p className="text-sm font-medium">
+                Model deployment was not successful: {err.message}
+              </p>
             </div>
           </div>
         </div>

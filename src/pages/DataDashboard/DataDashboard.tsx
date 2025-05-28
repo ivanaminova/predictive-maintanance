@@ -23,31 +23,23 @@ const DataDashboard = () => {
   const [activeTab, setActiveTab] = useState("charts");
   const [machines, setMachines] = useState<Machine[]>([]);
   const [selectedMachineId, setSelectedMachineId] = useState<string>();
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     apiService.getMachineList().then(setMachines);
+  }, []);
+
+  useEffect(() => {
+    apiService.getProjectList().then(setProjects);
   }, []);
 
   const handleChangeMachine = (id: string) => {
     setSelectedMachineId(id);
   };
 
-  const projects = [
-    { project_id: "1", name: "My First project" },
-    { project_id: "2", name: "Test Project" },
-    { project_id: "3", name: "Project" },
-    { project_id: "4", name: "another projec I made" }
-  ];
-
   return (
     <div className="allow-scroll h-screen overflow-auto">
       <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate(`/project/${projectId}`)}
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
         <h2 className="text-xl font-medium">Data Dashboard</h2>
       </div>
 
@@ -74,8 +66,8 @@ const DataDashboard = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {projects.map((p) => (
-                        <SelectItem key={p.project_id} value={p.project_id}>
-                          {p.name}
+                        <SelectItem key={p.id} value={p["project name"]}>
+                          {p["project name"]}
                         </SelectItem>
                       ))}
                     </SelectContent>

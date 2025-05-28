@@ -7,7 +7,6 @@ import { MachineDefaults } from "@/types";
 import SimulationFormModal from "./SimulationFormModal";
 import PredictionFormModal from "./PredictionFormModal";
 
-
 interface ChatMessage {
   id: string;
   content:
@@ -147,22 +146,43 @@ export const ChatPage = () => {
 
     let newParams = {};
 
+    const parseIfNumber = (value) => {
+      if (typeof value === "string" && value.trim() !== "") {
+        const parsed = Number(value);
+        if (!isNaN(parsed)) {
+          return parsed;
+        }
+      }
+      return value;
+    };
+
     for (const prop in changedData) {
       if (changedData.hasOwnProperty(prop)) {
         if (prop === "duration") {
           continue;
         }
-        if (changedData[prop] !== originalData[prop]) {
-          newParams[prop] = changedData[prop];
+
+        const originalValue = parseIfNumber(originalData[prop]);
+        const changedValue = parseIfNumber(changedData[prop]);
+
+        if (originalValue !== changedValue) {
+          newParams[prop] = changedValue;
         }
+      }
+    }
+
+    const parsedInitialValues = {};
+    for (const prop in originalData) {
+      if (originalData.hasOwnProperty(prop)) {
+        parsedInitialValues[prop] = parseIfNumber(originalData[prop]);
       }
     }
 
     return {
       machine_id: originalData.machine_id,
-      initial_values: originalData,
+      initial_values: parsedInitialValues,
       fixed_parameters: newParams,
-      duration_hours: changedData.duration,
+      duration_hours: parseIfNumber(changedData.duration),
     };
   };
 

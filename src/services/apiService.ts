@@ -11,13 +11,22 @@ export default {
       `/api/machine_defaults?machine_id=${machineId}`
     );
   },
+  getProjectList() {
+    return request("GET", `/api/project_list`);
+  },
+  createProject(project) {
+    return request("POST", `/api/projects`, project);
+  },
+  deleteProject(projectName) {
+    return request("DELETE", `/api/projects?name=${encodeURIComponent(projectName)  }`);
+  },
   postChatPrompt(propmtMessage) {
     return request("POST", `/chat`, propmtMessage);
   },
   uploadFiles(files) {
     return fetch(`/files/upload`, {
-      method: 'POST',
-      body: files
+      method: "POST",
+      body: files,
     });
   },
   trainModel() {
@@ -40,13 +49,12 @@ export default {
   },
 };
 
-
 //GET http://10.25.83.50:5000/machine_list
 //GET http://10.25.83.50:5000/machine_defaults?machine_id=${machineId}
 //POST http://10.25.83.50:5005/chat
 //POST http://10.25.83.50:5010/upload
 //GET http://10.25.83.50:5010/progress
 //POST http://10.25.83.50:5010/run-script
-// GET /sensor-data/{machine_id} 
+// GET /sensor-data/{machine_id}
 // GET /failures/{machine_id}
 // GET /maintenance/{machine_id}

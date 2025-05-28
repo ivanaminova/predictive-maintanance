@@ -360,20 +360,6 @@ const ProjectDetails = () => {
   };
 
   const handleDeployModel = async () => {
-    toast.custom((t) => (
-      <div
-        className={`${
-          t.visible ? "custom-enter 1s ease" : "custom-exit 1s ease forwards"
-        } max-w-md w-72 bg-secondary shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-      >
-        <div className="flex-1 w-0 p-4">
-          <div className="flex items-start gap-2">
-            <Loader />
-            <p className="text-sm font-medium">Deploying Model...</p>
-          </div>
-        </div>
-      </div>
-    ));
     try {
       setIsDeploying(true);
       const res = await apiService.deployModel();
@@ -414,8 +400,9 @@ const ProjectDetails = () => {
         </div>
       ));
     } finally {
-      setIsDeploying(false);
-      setPhaseDeploy(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
     }
   };
 
@@ -480,25 +467,11 @@ const ProjectDetails = () => {
               <Button
                 className="w-32 self-end"
                 onClick={handleDeployModel}
-                disabled={!completedTraining || phaseTrain || phaseDeploy}
+                disabled={phaseTrain}
               >
                 Deploy Model
               </Button>
             </div>
-
-            {deployingFinished && (
-              <span>
-                {!deployingFinished.includes("successfully") ? (
-                  <p className="text-sm font-medium text-[#fc6161] mb-2 flex justify-end">
-                    Yes!
-                  </p>
-                ) : (
-                  <p className="text-sm font-medium text-[#17eba0] mb-2 flex justify-end">
-                    Nope
-                  </p>
-                )}
-              </span>
-            )}
           </CardContent>
 
           <CardFooter className="flex justify-end"></CardFooter>

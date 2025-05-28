@@ -78,7 +78,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
         onSubmit={(e) => {
           e.preventDefault();
 
-          onSubmit({ ...selectedMachine, duration });
+          onSubmit({ ...selectedMachine });
         }}
         className="space-y-4"
       >
@@ -235,7 +235,7 @@ const SimulationForm: React.FC<SimulationFormProps> = ({
                   name="duration"
                   type="number"
                   step="0.5"
-                  value={selectedMachine?.duration ?? 24}
+                  value={selectedMachine.duration ?? 24}
                   onChange={handleChange("duration")}
                 />
               </FormControl>

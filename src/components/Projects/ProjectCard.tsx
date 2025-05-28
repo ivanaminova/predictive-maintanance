@@ -46,7 +46,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onDelete }) =
       >
         <div className="flex justify-between items-start mb-4">
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-project-name">
-            {project.name.charAt(0).toUpperCase()}
+            {project["project name"].charAt(0).toUpperCase()}
           </div>
           <button 
             onClick={handleDelete}
@@ -58,13 +58,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onDelete }) =
         </div>
         
         <div className="flex-1 flex flex-col items-center justify-center">
-          <h3 className="text-lg font-medium text-project-name">{project.name}</h3>
+          <h3 className="text-lg font-medium text-project-name">{project["project name"]}</h3>
         </div>
         
-        <div className="flex justify-between items-center mt-4">
-          <div className="text-xs text-project-muted">
-            {project.createdAt}
-          </div>
+        <div className="flex justify-end items-center mt-4">
           <div className="flex items-center gap-1 text-xs text-project-muted">
             <Box size={12} />
             <span>Project</span>

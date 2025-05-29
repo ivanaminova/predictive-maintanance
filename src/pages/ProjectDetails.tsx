@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, Cpu, CheckCheck, Ban } from "lucide-react";
 import { useProjects } from "@/context/ProjectContext";
@@ -18,9 +18,9 @@ import toast, { Toaster } from "react-hot-toast";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { getProject } = useProjects();
   const navigate = useNavigate();
-  const project = getProject(id || "");
+  const [project, setProject] = useState({});
+  const [projects, setProjects] = useState([]); 
 
   const [phaseUpload, setPhaseUpload] = useState(false);
   const [phaseTrain, setPhaseTrain] = useState(false);
@@ -46,12 +46,24 @@ const ProjectDetails = () => {
   const [completedTraining, setCompletedTraining] = useState(false);
   const progressIntervalRef = useRef(null);
 
+  useEffect(() => {
+    apiService.getProjectList().then(setProjects);
+  }, []);
+
+  useEffect(() => {
+    const found = projects.find((p) => p.id == id);
+    if (found) setProject(found);
+  }, [projects, id]);
+
+  console.log(projects);
+
   const requiredFilesMap: Record<string, string> = {
     "1": "equipment_usage.csv",
     "2": "failure_logs.csv",
     "3": "maintenance_history.csv",
     "4": "sensor_data.csv",
   };
+
   const requiredFilenames = Object.values(requiredFilesMap);
 
   const handleDrag = (e) => {
@@ -416,9 +428,11 @@ const ProjectDetails = () => {
           <ArrowLeft size={20} />
         </button>
         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-          {project.name.charAt(0).toUpperCase()}
+          {project["project name"]?.charAt(0).toUpperCase() || ""}
         </div>
-        <h2 className="text-xl font-medium">{project.name}</h2>
+        <h2 className="text-xl font-medium">
+          {project["project name"] || ""}
+        </h2>
       </div>
       <div className="m-40">
         <Card className="border border-border">

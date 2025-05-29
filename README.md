@@ -147,7 +147,7 @@ predictive-maintenance/
    ```
 
 4. **Open your browser**
-   Navigate to `http://localhost:5173` to view the application.
+   Navigate to `http://localhost:8080` to view the application.
 
 ### Build for Production
 
